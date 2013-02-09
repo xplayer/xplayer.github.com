@@ -1,0 +1,207 @@
+---
+layout: post
+title: Come fare integration test su un plugin per Jira 3.13.4
+tags:
+- Jira
+- tips
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+Quando si tratta di voler scrivere test di integrazione per il vostro meraviglioso plugin per Jira 3.13.4 (l'ultima versione di Jira, in attesa che la 4.0 esca dalla beta), ci si imbatte in una serie di problemi.
+Dopo qualche indagine, sono riuscito a risolverli tutti, e mi accingo a condividere la soluzione adottata, nella speranza che possa servire a qualcun altro (anche a me stesso tra qualche mese...).
+
+Premetto che stiamo sviluppato il plugin usando maven2, che per questo genere di cose è davvero molto comodo.
+Se avete qualche dubbio, ecco due riferimenti:
+<ul>
+	<li><a title="How to Build an Atlassian Plugin" href="http://confluence.atlassian.com/display/DEVNET/How+to+Build+an+Atlassian+Plugin">http://confluence.atlassian.com/display/DEVNET/How+to+Build+an+Atlassian+Plugin</a></li>
+	<li><a title="Testing your plugin" href="//confluence.atlassian.com/display/DEVNET/Testing+your+plugin">http://confluence.atlassian.com/display/DEVNET/Testing+your+plugin</a></li>
+</ul>
+Il pom.xml generato da maven usando l'archetipo per plugin di Jira contiene una sezione "properties" che, all'inizio, si presenta così:
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;">&lt;properties&gt;
+&lt;atlassian.plugin.key&gt;
+com.sourcesense.jira.plugin.MyWonderfulPluginToSaveTheWorld
+&lt;/atlassian.plugin.key&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!-- JIRA version --&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.version&gt;3.13&lt;/atlassian.product.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!-- JIRA functional test library version --&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.test-lib.version&gt;3.13&lt;/atlassian.product.test-lib.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!-- JIRA data version --&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.data.version&gt;3.13&lt;/atlassian.product.data.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;">&lt;/properties&gt;</span>
+
+Qui trovate una <a href="http://confluence.atlassian.com/display/DEVNET/Testing+your+plugin#Testingyourplugin-SystemProperties">descrizione di queste properties</a>, assieme ai loro valori di default.
+
+Ecco un estratto:
+<p style="padding-left:20px;"><em><strong>"atlassian.product.version" </strong>- version of the Atlassian product to compile and test against.</em></p>
+<p style="padding-left:20px;"><em><strong>"atlassian.product.data.version"</strong> - version of the test resource bundle that contains the basic Atlassian product configuration data for the integration test environment. These versions mimic the actual Atlassian product versions. However we might only modify and release the relevant projects for the reasons of non-backwards compatibility of the new versions of Atlassian products. Therefore not every version of Atlassian products will have a corresponding version of the resource bundle.</em></p>
+La property <strong>"atlassian.product.test-lib.version"</strong> non è documentata, e per capire il suo significato dovete chiedere a Google, che vi rispondera' con <a href="http://www.customware.net/repository/display/ATLASSIAN/Integration+Testing+of+Confluence+Plugins">questa utile pagina</a>.
+<p style="padding-left:20px;"><em><strong>"atlassian.product.test-lib.version"</strong> - The version of the testing library to use, as a general recommendation you should at least use version 2.0 or higher as it exposes more of the page's content and provides quite a few extra helper classes to aid in your testing.</em></p>
+Benissimo, quindi io che sto facendo un plugin per la versione 3.13.4 di Jira, sostituisco questo valore nelle tre properties del POM
+<pre style="padding-left:20px;">&lt;properties&gt;
+ ...
+    &lt;atlassian.product.version&gt;3.13.4&lt;/atlassian.product.version&gt;
+    &lt;atlassian.product.test-lib.version&gt;3.13.4&lt;/atlassian.product.test-lib.version&gt;
+    &lt;atlassian.product.data.version&gt;3.13.4&lt;/atlassian.product.data.version&gt;
+ &lt;/properties&gt;</pre>
+Detto, fatto.
+Mi manca solo di creare il mio primo test di integrazione, rigorosamente nel package che inizia con "it".
+<pre> package it.com.sourcesense.jira.plugin;
+
+ import com.atlassian.jira.webtests.JIRAWebTest;
+
+ public class JiraTest extends JIRAWebTest {
+
+    public JiraTest(String name) {
+      super(name);
+    }
+
+    public void setUp() {
+      super.setUp();
+      restoreDataWithLicense("JiraDataForTest.xml", ENTERPRISE_KEY);
+   }
+
+   public void testVerySimple() throws Exception {
+      assertTextPresent("This JIRA site is for demonstration purposes only");
+   }
+ }</pre>
+E copiare il dump esportato da Jira per avere qualche dato di test (JiraDataForTest.xml) nel folder src/test/xml/ del progetto del plugin.
+
+A questo punto non mi resta che lanciare il seguente comando nella home della progetto
+<pre style="padding-left:20px;">mvn integration-test</pre>
+e aspettare con pazienza che maven scarichi quel Terabyte di jar di cui dichiara di aver bisogno.
+
+Primo problema: la console di mvn mi dice
+<pre> [INFO] [jar:jar]
+ [INFO] Building jar:
+        /private/tmp/HelloWorldPlugin/target/MyWonderfulPluginToSaveTheWorld-1.0-SNAPSHOT.jar
+ [INFO] [antrun:run {execution: generate-integration-test-config}]
+ [INFO] Executing tasks
+ [touch] Creating
+  /private/tmp/MyWonderfulPluginToSaveTheWorld/target/test-classes/localtest.properties
+ [propertyfile] Updating property file:
+  /private/tmp/MyWonderfulPluginToSaveTheWorld/target/test-classes/localtest.properties
+ [INFO] Executed tasks
+ [INFO] [antrun:run {execution: pre-integration-test-user-ant-tasks}]
+ [INFO] Executing tasks
+ [INFO] Executed tasks
+ [INFO] [atlassian-test-harness:start-fisheye {execution: start-fisheye}]
+ [INFO] Skipping fisheye; startService is set to false
+ [INFO] [atlassian-test-harness:start-confluence {execution: start-confluence}]
+ [INFO] Skipping confluence; startService is set to false
+ [INFO] [atlassian-test-harness:start-jira {execution: start-jira}]
+ [INFO] Output log is set to /private/tmp/MyWonderfulPluginToSaveTheWorld/target/jira/output.log</pre>
+E si blocca lì.
+Vado a vedere il log segnalato nell'ultima riga della console, e scopro una pletora di eccezioni:
+<pre>2009-07-07 16:11:19,568 main ERROR
+[com.atlassian.license.LicenseManager] Exception getting license: java.lang.RuntimeException: contactLicense was null
+ at org.picocontainer.defaults.DecoratingComponentAdapter.getComponentInstance(DecoratingComponentAdapter.java:42)
+ at org.picocontainer.defaults.SynchronizedComponentAdapter.getComponentInstance(SynchronizedComponentAdapter.java:35)
+ ...</pre>
+Indago, guardo su Google, niente.
+Provo allora a sostituire 3.13.4 con 3.13.2 nelle tre properties del POM
+<pre style="padding-left:20px;">&lt;properties&gt;
+    ...
+   &lt;atlassian.product.version&gt;3.13.2&lt;/atlassian.product.version&gt;
+   &lt;atlassian.product.test-lib.version&gt;3.13.2&lt;/atlassian.product.test-lib.version&gt;
+   &lt;atlassian.product.data.version&gt;3.13.2&lt;/atlassian.product.data.version&gt;
+&lt;/properties&gt;</pre>
+E rilancio "mvn integration-test".
+Stavolta l'errore è più chiaro: fallisce il ripristino del dump JiraDataForTest.xml nell'istanza di Jira 3.13.2 che viene avviata da maven, perchè la versione del dump è stata fatta con la 3.13.4, una versione successiva alla 3.13.2, e quindi Jira si rifiuta da caricarla. Eccheccavolo.
+
+Vi risparmio tutte le combinazioni di numeri di versione che ho provato a mettere nel POM, senza successo, e vado dritto verso la soluzione.
+Ecco il pom.xml che funziona
+<pre style="padding-left:20px;">&lt;properties&gt;
+ ...
+ &lt;atlassian.product.version&gt;3.13.2&lt;/atlassian.product.version&gt;
+ &lt;atlassian.product.test-lib.version&gt;3.13.4&lt;/atlassian.product.test-lib.version&gt;
+ &lt;atlassian.product.data.version&gt;3.13.2&lt;/atlassian.product.data.version&gt;
+ &lt;/properties&gt;</pre>
+L'altra cosa da fare è modificare i dump di Jira che vorrete usare per i vostri test, in modo da far credere a Jira che sta importando una versione compatibile del dump.
+Per fare questo dovete:
+
+1. Aprire il dump xml di Jira che usate per i test (nel nostro caso JiraDataForTest.xml)
+
+2. Cercare l'occorrenza di questa property
+<pre style="padding-left:20px;">&lt;OSPropertyEntry id="12345"
+   entityName="jira.properties"
+   entityId="1"
+   propertyKey="jira.version.patched"
+   type="5"/&gt;</pre>
+<p style="padding-left:20px;">Per essere sicuri basta che cerchiate la parola "jira.version.patched"</p>
+3. Prendere nota dell'id di questa propery (es 12345) e cercare l'occorrenza di una OSPropertyString con lo stesso id
+<pre style="padding-left:20px;">&lt;OSPropertyString id="12345" value="354"/&gt;</pre>
+<p style="padding-left:20px;">Ecco, quel valore (354) rappresenta la build version di Jira, che per la 3.13.4 è proprio 354.</p>
+4. Sostituire il valore 354 con 335, che è la build versione di Jira 3.13.2 e salvare l'xml
+
+5. Rilanciare il test.
+
+Tutto dovrebbe filare liscio ora...
+<pre> $ mvn integration-test
+ ...
+ ...
+ [INFO] [jar:jar]
+ [INFO] Building jar:
+    /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/
+    target/MyWonderfulPluginToSaveTheWorld-1.0-SNAPSHOT.jar
+ [INFO] [antrun:run {execution: generate-integration-test-config}]
+ [INFO] Executing tasks
+ [propertyfile] Updating property file:
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/
+   target/test-classes/localtest.properties
+ [INFO] Executed tasks
+ [INFO] [antrun:run {execution: pre-integration-test-user-ant-tasks}]
+ [INFO] Executing tasks
+ [INFO] Executed tasks
+ [INFO] [atlassian-test-harness:start-fisheye {execution: start-fisheye}]
+ [INFO] Skipping fisheye; startService is set to false
+ [INFO] [atlassian-test-harness:start-confluence {execution: start-confluence}]
+ [INFO] Skipping confluence; startService is set to false
+ [INFO] [atlassian-test-harness:start-jira {execution: start-jira}]
+ [INFO] Output log is set to
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/target/jira/output.log
+ [INFO] Finished with jira goal
+ [INFO] [atlassian-test-harness:start-bamboo {execution: start-bamboo}]
+ [INFO] Skipping bamboo; startService is set to false
+ [INFO] [surefire:test {execution: acceptance_tests}]
+ [INFO] Surefire report directory:
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/target/surefire-reports
+
+ -------------------------------------------------------
+ T E S T S
+ -------------------------------------------------------
+ Running it.com.sourcesense.jira.plugin.JiraTest
+ .
+ . Started it.com.sourcesense.jira.plugin.JiraTest.test. Wed Jul 08 14:30:44 CEST 2009
+ going to page secure/admin/XmlRestore!default.jspa
+ Asserting text present: Your project has been successfully imported
+ Asserting text present: This JIRA site is for demonstration purposes only
+ .
+ . Finished it.com.sourcesense.jira.plugin.JiraTest.test. Wed Jul 08 14:30:54 CEST 2009
+ . The test ran in 10.542 seconds
+ . The test suite has been running for 10.536 seconds
+ . Max Mem : 66650112 Total Mem : 2727936 Free Mem : 268968
+ . ______________________________
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.045 sec
+
+ Results :
+
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+ [INFO] ------------------------------------------------------------------------
+ [INFO] BUILD SUCCESSFUL
+ [INFO] ------------------------------------------------------------------------
+ [INFO] Total time: 44 seconds
+ [INFO] Finished at: Wed Jul 08 14:30:55 CEST 2009
+ [INFO] Final Memory: 32M/254M
+ [INFO] ------------------------------------------------------------------------</pre>
+Evviva, barra verde!!

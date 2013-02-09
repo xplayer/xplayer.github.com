@@ -1,0 +1,31 @@
+---
+layout: post
+title: ! '[Oracle Tips] Monitorare le connessioni aperte verso il db'
+tags:
+- monitoring
+- oracle
+- sql
+- tips
+status: publish
+type: post
+published: true
+meta: {}
+---
+Ogni volta che mi serve tenere d'occhio le connessioni verso un db Oracle mi ricordo vagamente della tabella <i>Vqualcosa</i>, ma il ricordo non e' mai abbastanza nitido... Pertanto mi segno qui alcune query utili, una volta per tutte!
+
+Per contare le connessioni aperte verso il db raggruppate per macchina client
+<blockquote><code>    select MACHINE, count(*) from V$SESSION group by MACHINE</code></blockquote>
+Per contare solo quelle verso un certo schema
+<blockquote><code>    select MACHINE, count(*) from V$SESSION where schemaname = '&lt;NOME DELLO SCHEMA&gt;' group by MACHINE</code></blockquote>
+Per contare solo quelle provenienti da certi client
+<code></code>
+<blockquote><code>    select MACHINE, count(*) from V$SESSION where upper(machine) like '%&lt;NOME DELLA MACCHINA CLIENT&gt;%' group by MACHINE</code></blockquote>
+Per contare le connessioni aperte verso il db raggruppate per utente
+<code></code>
+<blockquote><code>    select osuser, count(*) from V$SESSION group by osuser;</code></blockquote>
+Per contare tutte le connessioni aperte (vabbe', questa e' banale!)
+<code></code>
+<blockquote><code>    select count(*) from V$SESSION;</code></blockquote>
+Per vedere anche lo stato della connessione
+<code></code>
+<blockquote><code>    select count(*), status from V$SESSION group by status;</code></blockquote>

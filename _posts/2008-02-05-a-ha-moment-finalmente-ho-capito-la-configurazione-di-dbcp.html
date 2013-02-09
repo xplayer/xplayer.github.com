@@ -1,0 +1,29 @@
+---
+layout: post
+title: ! '[a-ha! moment] Finalmente ho capito la configurazione di DBCP'
+tags:
+- configuration
+- connectionpool
+- dbcp
+- programming
+status: publish
+type: post
+published: true
+meta: {}
+---
+Questo post e' piu' che altro indirizzato a me stesso nel futuro, ma ovviamente se potesse servire ad altri, ora o nel futuro, ne saro' contento.
+
+Ho finalmente capito il significato dei parametri di configurazione di DBCP!
+I miei dubbi riguardavano in particolare i parametri <i>minIdle</i>, <i>maxIdle </i>e <i>maxActive</i>.
+
+Le connessioni aperte in un dato istante possono potenzialmente essere comprese tra zero e <i>maxActive</i>.
+
+Quando il n. di connessioni aperte e' compreso tra <i>maxIdle </i>e <i>maxActive</i>, tutte le connessioni ritornate al pool saranno immediatamente chiuse dal pool.
+
+Quando il n. di connessioni aperte e' compreso tra <i>minIdle </i>e <i>maxIdle</i>, tutte le connessioni ritornate al pool saranno soggette all'eventuale evictor (che si attiva con la prop <i>timeBetweenEvictionRunsMillis</i>). Questo significa che quando l'evictor parte, chiudera' tutte le connessioni in eccedenza (rispetto a <i>minIdle</i>), ovviamente secondo le impostazioni dei parametri <i>numTestsPerEvictionRun </i>e <i>minEvictableIdleTimeMillis </i>(quest'ultima in particolare indica quando tempo una connessione 'in eccesso' puo' rimanere idle nel pool prima di essere considerata 'chiudibile' dall'evictor thread).
+
+Quando il n. di connessioni aperte e' compreso tra zero e <i>minIdle</i>, tutte le connessioni ritornate al pool saranno lasciate nel pool. In altre parole non si dovrebbe mai scendere al di sotto di <i>minIdle </i>connessioni aperte verso il db.
+
+Ora, magari questo puo' sembrare scontato a voi, ma a me no!  DBCP ha una documentazione piuttosto fumosa, e in particolare faccio ancora fatica a capire la differenza tra i vari parametri di configurazione... per esempio, cosa si intende per abandonedConnection? E come si distingue da una normale connessione idle?
+
+Comunque intanto mi godo il mio <i>a-ha! moment</i> :)

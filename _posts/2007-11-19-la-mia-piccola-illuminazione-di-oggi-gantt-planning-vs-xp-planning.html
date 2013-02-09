@@ -1,0 +1,27 @@
+---
+layout: post
+title: ! 'La mia piccola illuminazione di oggi: GANTT planning vs XP planning'
+tags:
+- Agile
+- planning
+status: publish
+type: post
+published: true
+meta: {}
+---
+La mia piccola illuminazione di oggi riguarda il modo tradizionale di pianificare e gestire un progetto software, ovvero con un bel <a href="http://en.wikipedia.org/wiki/Gantt_chart">GANTT</a> e MS Project.
+
+Per la prima volta ho dovuto analizzare il GANTT per la nuova release di un progetto su cui sto lavorando, e rivedere alcune attivita' a nostro carico per capire se mancava qualcosa e verificare le dipendenze e le stime. Ci mancherebbe, se c'e' da fare, si fa', ma ho sentito pian piano sorgere un senso di frustrazione...
+Ho poi capito il senso di fastidio che provavo: il GANTT (almeno, questo GANTT) e' piuttosto "tecnical-task centrico", ovvero organizza le attivita' "tecniche", ma non considera in nessun modo le features dal punto di vista del customer.
+
+Tutto il contrario della pianificazione in XP, che e' "business-value centrica", ovvero usa le user stories ("units of customer-visible functionality") per pianificare pezzi di funzionalita', a prescindere poi dai task tecnici che possono esserci dietro (e che vanno certo esplicitati, se e' il caso, ma che non hanno valore di business di per se').
+
+Ma perche' questa differenza?
+
+Forse questo e' dovuto al fatto che, mentre il GANTT e' uno strumento <u>del project manager</u> per guidare il team di sviluppo (il customer lo vedra' mai?), le user stories sono invece uno strumento <u>del customer</u> per guidare lo stesso team.
+In altre parole la pianificazione in XP coinvolge in prima persona il team dei customers (project manager, product manager, marketing, utenti, ...), mentre in un progetto tradizionale la dinamica e' del tipo "eccoti le specifiche, ci si rivede a fine progetto".
+
+Sta di fatto che io, abituato a ragionare innanziutto per user stories, mi sono ritrovato piuttosto a disagio a ragionare per task tecnici, perche' facevo fatica a vederci dietro le funzionalita', e  spesso anzi trovavo che la somma dei task tecnici non bastava a coprire la funzionalita' che il sistema dovrebbe realizzare.
+
+E' un po' come descrivere un quadro attraverso la somma dei tratti del pennello che lo compongono... si rischia di perdere il senso complessivo dell'opera.
+Il rischio nel caso del software e' quello perdere tra i tanti task tecnici i veri obbiettivi di una feature, ovvero produrre qualcosa che risponde a delle necessita' del customer.

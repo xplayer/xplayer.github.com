@@ -1,0 +1,63 @@
+---
+layout: post
+title: Affinare la metrica
+tags:
+- Metrics
+status: publish
+type: post
+published: true
+meta: {}
+---
+<span class="171513421-13112006"><font face="Arial" size="2">La recente  discussione in seno al team XPlayers di <a href="www.quinary.com">Quinary </a>sulle nostre metriche e su come affinarle mi ha fatto riflettere un  po' e volevo condividere con voi questi pensieri, ovvero una proposta di  cambiamento della metrica (da sottoporre a prova sul campo, si  intende).</font></span>
+
+<span class="171513421-13112006"></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">Il nostro magic  number, dopo varie discussioni su quali fattori includere, e' stato definito  all'inizio in questo semplice </font></span><span class="171513421-13112006"><font face="Arial" size="2">modo</font></span>
+
+<span class="171513421-13112006"></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><strong>Magic Number  = NCSS / (LCOM * CCN)</strong></font></span>
+
+<span class="171513421-13112006"></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">dove le premesse  erano che (ditemi se sbaglio):</font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">se  <strong>NCSS</strong> cresce e' un bene    (maggiore  produttivita'?)</font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">se  <strong>LCOM</strong> scende e' un bene    (maggiore  coesione)</font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">se  <strong>CCN</strong> (McCabe) scende e' un bene    (minore complessita' "di  flusso")</font></span>
+
+<span class="171513421-13112006"></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">Io penso che in  questa formula NCSS abbia un peso troppo forte, e questo favorisce oscillazioni  come quelle che abbiamo osservato nelle scorse settimane (vedi thread su  "Metriche di oggi"). </font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">Ora, non so per  certo se queste oscillazioni siano giuste o meno, e capisco anche che, cosi'  come esiste il 'debito di refactoring' quando si scrive molto codice ma lo si  rifattorizza poco, possa esistere una sorta di 'debito di produttivita diretta'  quando si rifattorizza molto (e quindi si produce un delta di NCSS piccolo o  addirittura negativo).</font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2">Pero' penso che sia  giusto far entrare nella formula un fattore che premia il codice rifattorizzato,  e pertanto propongo di provare la seguente formula</font></span>
+
+<span class="171513421-13112006"></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"><font face="Arial" size="2"><strong>Magic Number = NCSS /  (LCOM * CCN * <font color="#ff0000">lunghezza media dei metodi</font>)  </strong></font></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"><strong>dove <font color="#ff0000">lunghezza media dei  metodi</font> = <font color="#000000"> NCSS /  #metodi</font></strong></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006">il che significherebbe, semplificando i  fattori</span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"><strong>Magic Number = #metodi / (LCOM *  CCN)</strong></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006">questa variazione permette secondo me (ma vorrei  provarla per avere una qualche certezza) di premiare certamente la produzione di  codice (come accadeva per l'NCSS), ma di codice rifattorizzato (che poi sia  ben rifattorizzato questo non saprei come misurarlo).</span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006">In altre parole se scrivo tanto codice nuovo, ma lo  metto in pochi metodi grossi ho un incremento minore di quanto non avrei se lo  stesso codice fosse messo in metodi piu' brevi e  concisi.</span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006"></span></font></span>
+
+<span class="171513421-13112006"><font face="Arial" size="2"><span class="171513421-13112006">Che ne dite?</span></font></span>

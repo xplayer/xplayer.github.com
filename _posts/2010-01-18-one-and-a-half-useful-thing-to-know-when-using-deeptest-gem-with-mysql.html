@@ -1,0 +1,40 @@
+---
+layout: post
+title: One (and a half) useful thing to know when using DeepTest gem with MySQL
+tags:
+- Rails
+- Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+<a href="http://github.com/qxjit/deep-test">DeepTest</a> currently won't work if you've configured MySQL with no password (in other words, if you are able to connect to mysql with a simple "mysql -u root").
+To fix this, you have to patch DeepTest (I know, asap I'll go through the whole process to propose the patch to the original project leader).
+Actually, you have to comment out a line, in the <em>DeepTest:Database:MysqlSetupListener#grant_privileges </em>method:
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+<span style="color:#400000;font-weight:bold;">def</span> grant_privileges<span style="color:#806030;">(</span>connection<span style="color:#806030;">)</span>
+sql <span style="color:#806030;">=</span> %<span style="color:#806030;">{</span>grant all on <span style="color:#c34e00;">#{worker_database}.*</span>
+to %s@<span style="color:#e60000;">'localhost'</span>;<span style="color:#806030;">}</span> % <span style="color:#806030;">[</span>
+connection<span style="color:#806030;">.</span>quote<span style="color:#806030;">(</span>worker_database_config<span style="color:#806030;">[</span>:username<span style="color:#806030;">]</span><span style="color:#806030;">)</span><span style="color:#c34e00;"># ,</span>
+<span style="color:#c34e00;"># connection.quote(worker_database_config[:password])  &lt;-- mysql with no password won't work</span>
+<span style="color:#806030;">]</span>
+connection<span style="color:#806030;">.</span>execute sql
+<span style="color:#400000;font-weight:bold;">end</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+</pre>
+Another tip (the "half" in the blog post title):
+Don't forget to edit the "pattern" option in your DeepTest rake task, to be able to grab all the testcases you want.
+In my case, I want to skip a whole folder containing selenium tests, so I have to write my Deep Test rake file this way:
+(in <em>/lib/tasks/test.rake</em>)
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#800000;font-weight:bold;">require</span> <span style="color:#e60000;">"deep_test/rake_tasks"</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+
+DeepTest::TestTask<span style="color:#806030;">.</span><span style="color:#400000;font-weight:bold;">new</span> <span style="color:#e60000;">"deep"</span> <span style="color:#400000;font-weight:bold;">do</span> |t|
+t<span style="color:#806030;">.</span>number_of_workers <span style="color:#806030;">=</span> <span style="color:#c00000;">2</span>
+t<span style="color:#806030;">.</span>pattern <span style="color:#806030;">=</span> <span style="color:#e60000;">"test/{unit,functional,integration}/**/*_test.rb"</span>
+t<span style="color:#806030;">.</span>libs &lt;&lt; <span style="color:#e60000;">"test"</span>
+t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030;">=</span> <span style="color:#e60000;">"DeepTest::Database::MysqlSetupListener"</span>
+<span style="color:#400000;font-weight:bold;">end</span>
+</pre>

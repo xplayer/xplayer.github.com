@@ -1,0 +1,33 @@
+---
+layout: post
+title: ! 'Learning Ruby reimplementing it: attr_writer'
+tags:
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  jabber_published: '1329058236'
+  _edit_last: '544375'
+  email_notification: '1329058237'
+---
+This is how attr_writer may be (re)implemented:
+
+[sourcecode language="ruby"]
+module Kernel
+  def attribute_writer(attribute)
+    define_method(&quot;#{attribute}=&quot;.to_sym) do |value|
+      instance_variable_set(&quot;@#{attribute}&quot;, value)
+    end
+  end
+end
+
+class MyClass
+  attribute_writer :my_attribute
+end
+
+m = MyClass.new
+m.my_attribute = 23
+
+puts m.instance_variable_get &quot;@my_attribute&quot; # =&gt; 23
+[/sourcecode]

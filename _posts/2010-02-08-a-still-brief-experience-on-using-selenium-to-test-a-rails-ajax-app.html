@@ -1,0 +1,102 @@
+---
+layout: post
+title: A (still brief) experience on using Selenium to test a Rails + ajax app
+tags:
+- Rails
+- Testability
+- tips
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+<div>
+<div>
+
+This is a note to make a point on our (mine and my team's) current use of Selenium  to test the ajax behaviour in the Rails webapp we're currently developing. Ajax replacing of part of the page is growing, and with it we have  to face the classical question: <em>"how do we test (I mean  automatically :-) the  ajax/javascript behaviours in our webapp?"</em>.
+
+This is how we are trying to manage this issue now, after some days  of spiking on Selenium, Watir and BlueRidge (I hope to write more on Watir and BlueRidge in some future post, because these two tools are worth speaking).
+
+Actually we are giving a try to the combination of Webrat + Selenium,  since we already have a big test suite of integration test using Webrat,  and have a good knowledge of the Webrat API.
+
+We added the selenium-client gem to be able to drive Selenium through  the Webrat API.
+This is extracted from our test environment configuration file:
+<div>
+<div><strong>test.rb</strong></div>
+<div>
+<pre>...
+config.gem 'selenium-client', :lib =&gt; 'selenium/client'
+config.gem "webrat", :version =&gt; '&gt;= 0.6.0'
+...</pre>
+</div>
+</div>
+Then, we defined a class from which all the selenium test cases will  inherit.
+This class basically is used to
+<ul>
+	<li>disable the transactional fixtures in Rails, to allow the browser  process where Selenium runs to access the data prepared in the tests</li>
+	<li>configure Webrat with the "selenium" mode</li>
+	<li>be the place to collect helper methods as "login" or "logout", used  in many tests.</li>
+</ul>
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>class SeleniumIntegrationTest &lt; ActionController::IntegrationTest
+  self.use_transactional_fixtures = false
+
+  setup :switch_webrat_to_selenium
+  def switch_webrat_to_selenium
+    Webrat.configure do |config|
+      config.mode = :selenium
+      config.application_environment = :test
+    end
+
+    selenium.set_speed(100)       # default is 0 ms
+    selenium.set_timeout(10000)   # default is 30000 ms
+  end
+
+  teardown :delete_cookies
+  def delete_cookies
+    selenium.delete_all_visible_cookies
+  end
+
+protected
+ ...
+ [other helper methods here, like login, logout, and so on...]
+
+ ...</pre>
+</div>
+</div>
+We also added a rake task to be able to launch all the selenium tests
+<div>
+<div><strong>test.rake</strong></div>
+<div>
+<pre>namespace :test do
+  ...
+  ...
+
+  desc "Run Selenium Test"
+  Rake::TestTask.new(:selenium) do |t|
+    t.libs &lt;&lt; "test"
+    t.test_files = FileList['test/selenium/*test.rb']
+    t.verbose = true
+  end
+end</pre>
+</div>
+</div>
+One thing we learned through several repeated mistakes is that the  Webrat API is different when called in the "selenium" mode then the one  we were used to when using Webrat in the classical "rails" mode.
+For example, the "assert_have_selector" method for selenium only takes  one argument, that is the CSS selector, while in the classical webrat  mode, the same method takes another parameter to specify the expected  content to match with (see this rdoc: <a rel="nofollow" href="http://gitrdoc.com/brynary/webrat/tree/master">http://gitrdoc.com/brynary/webrat/tree/master</a>).  So we had to define helper methods based on "assert_have_xpath" method  using xpath to express the same intent of a method like  assert_have_selector(css_selector, expected_content)
+
+Here is our helper method
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>  ...
+  def assert_has_id id, text_content
+    assert_have_xpath "//*[@id='#{id}'][1][text()='#{text_content}']"
+  end
+  ...</pre>
+</div>
+</div>
+</div>
+</div>

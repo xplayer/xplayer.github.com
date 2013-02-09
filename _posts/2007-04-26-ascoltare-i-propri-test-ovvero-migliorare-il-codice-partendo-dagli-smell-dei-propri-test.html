@@ -1,0 +1,24 @@
+---
+layout: post
+title: Ascoltare i propri test, ovvero migliorare il codice partendo dagli smell dei
+  propri test
+tags:
+- Design
+- Mock Objects
+- OOPrinciples
+- Testability
+- Testing
+status: publish
+type: post
+published: true
+meta: {}
+---
+Steve Freeman e Nat Pryce hanno iniziato una serie di interessanti post sul loro blog <a href="http://www.mockobjects.com">mockobjects </a>sul tema dei <a href="http://www.mockobjects.com/labels/listening%20to%20the%20tests.html">Test Smells,</a>  ovvero su come 'ascoltare' i propri test per scoprire possibilita' di miglioramento nel design del codice sotto test
+<blockquote><em>    In our experience, when we find that our tests are awkward to write, it's usually because the design of our target code can be improved.</em></blockquote>
+Una cosa su cui mi trovo d'accordo, piu' che altro perche' ho avuto la stessa esperienza in passato (e anche nel presente!)
+
+<a href="http://xplayer.files.wordpress.com/2007/05/strip_paoladibello.jpg" title="Test Smells…"><img src="http://xplayer.files.wordpress.com/2007/05/strip_paoladibello.jpg" alt="Test Smells…" height="283" width="1278" /></a>
+
+Il primo post della serie e'  <a href="http://www.mockobjects.com/2007/04/test-smell-i-need-to-mock-object-i-cant.html">Test Smell: I need to mock an object I can't replace (without magic)</a>,  dove si parte da un codice piuttosto 'chiuso', con dipendenze nascoste (magari usando dei Singleton), e passo passo lo si rifattorizza, aprendolo, prima introducendo un fake (o stub che dir si voglia) e poi passando ai mock, mostrando come il codice migliori, prima esplicitando le dipendenze e poi assegnando meglio le responsabilita'.
+
+Se vi capita dategli un'occhiata!

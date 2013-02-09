@@ -1,0 +1,45 @@
+---
+layout: post
+title: Perche' non si dovrebbero mockizzare classi concrete
+tags:
+- Design
+- Mock Objects
+- OOPrinciples
+status: publish
+type: post
+published: true
+meta: {}
+---
+Mi sono sempre chiesto perche' mai Steve Freeman e gli altri 'padri' dei Mock Objects e dello stile di testing interaction-based sconsigliassero di fare mock di classi concrete, tanto che <em>jMock </em>ed <em>EasyMock </em>non supportavano questa possibilita' 'nativamente', ma si doveva installare un'estensione a parte, che usa la famosa libreria <em>CGLIB </em>(per inciso con il nuovo jMock 2 e' possibile fare mock di classi concrete, ma si deve usare la classe UnsafeHackConcreteClassImposteriser, ed il nome dice tutto di come scoraggino questa pratica).
+
+Tanto che tempo fa avevo anche commentato un <a href="http://www.mockobjects.com/2006/10/jmock-listening-to-opinionated.html#comments" title="Commento al post di Freeman">post di Freeman</a> chiedendogli perche' lui giudicasse il mock di classi concrete come una sorta di ultima possibilita' da adottare solo in casi di emergenza (es quando si affronta codice legacy particolarmente ostico e <em>chiuso</em>). E lui mi aveva risposto cosi':
+<blockquote><font color="#000000"><em>Because then the interface is implicit, which means you can't see it and you haven't given it a name. Instead of using the test to expose a feature of the design, you have more to think about whenever you're working in that area: is the method overwritten? is it in a super class? what about the state of the rest of the class I'm extending? That sort of thing.</em></font>
+
+<font color="#000000"><em>For me, the CGLIB should have a "Break Glass in Case of Emergency" written on the front. It's useful in tight situations, but not to be recommended.</em></font></blockquote>
+Eppero' nonostante la sua risposta la cosa non mi era ancora chiara fino in fondo.
+Poi un recente post su mockobjects.com (<a href="http://www.mockobjects.com/2007/04/test-smell-mocking-concrete-classes.html"><strong>Test Smell: Mocking concrete classes</strong></a>) mi ha finalmente aiutato a capire meglio le cose.
+
+Il fatto e' che lo scopo del TDD con i Mock Objects e' quello di scoprire e far emergere relazioni tra oggetti, e dare nomi a queste relazioni. Se pero' si mantiene la relazione tra oggetti a livello di classi concrete, queste relazioni rimangono per cosi' dire piu' nascoste, implicite, e quindi diventa difficile individuarle e darle un nome.
+
+Cito direttamente il post, laddove spiega cosa non va con i mock di classi concrete:
+<blockquote><font color="#000000"><em>The problem with this approach is that it leaves the relationship between the objects implicit.
+I hope we've made clear by now that <strong>the intention of Test-Driven Development with Mock Objects is to discover relationships between objects</strong>.
+If I subclass, there's nothing in the domain code to make such a relationship visible, just methods on an object. This makes it harder to see if the service that supports this relationship might be relevant elsewhere and I'll have to do the analysis again next time I work with the class.</em></font></blockquote>
+<img src="//dictionarytip/skin/book.png" style="border:1px solid blue;z-index:90;position:absolute;left:505px;top:293px;" />
+
+Addirittura si spinge a dire che lasciando le relazioni tra oggetti a livello di classi concrete, si rischia di violare l'<a href="http://www.objectmentor.com/resources/articles/isp.pdf">Interface Segregation Principle</a>, perche' le classi dipendono da una interfaccia piu' grande di quella che usano veramente.
+
+E poi poco piu' avanti spiega che l'approccio <em>mockist</em> aiuta anche a dare nomi alle relazioni ed ai ruoli, e a ragionare piu' in termini di dominio piuttosto che di implementazione:
+<blockquote><font color="#000000"><em>There's a more subtle but powerful reason for not mocking concrete classes.
+As part of the TDD with Mocks process, I have to think up names for the relationships I discover—in this example the <code>ScheduledDevice</code>. I find that this makes me think harder about the domain and teases out concepts that I might otherwise miss.
+Once something has a name, I can talk about it. </em></font></blockquote>
+Il tutto e' poi riassunto bene nell'altro post, <a href="http://www.mockobjects.com/2007/05/what-tests-will-tell-you.html">What the tests will tell you</a>, da leggere e rileggere, dove elenca alcuni benefici derivanti dall'approccio TDD+MockObjects
+<ul>
+	<li><em>Keeping knowledge local</em></li>
+	<li><em>If it's explicit I can name it</em></li>
+	<li><em>More names mean more domain information</em></li>
+	<li><em>Pass behaviour rather than data</em></li>
+</ul>
+Detto questo, ammetto che sono sempre stato affascinato da questo approccio ma non ho mai trovato la forza necessaria per decidere di applicarlo un po' piu' sistematicamente, metterlo alla prova insomma.
+
+Un po' perche' nel mio team da sempre si usa l'approccio classico, e l'approccio interaction-based e' visto con qualche dubbio/sospetto, un po' perche' i nostri progetti per ora sono tutti Java 1.4 e quindi buona parte delle comodita' delle versioni piu' recenti dei framework jMock e Easymock te le perdi (soprattutto la loro maggiore <em>letteralita'</em>, cosa importante per avere dei test validi).

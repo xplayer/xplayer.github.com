@@ -1,0 +1,79 @@
+---
+layout: post
+title: ! 'Ruby: how to spot slow tests in your test suite'
+tags:
+- Rails
+- Ruby
+- Testing
+- tips
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+This is actually my first post in english and also my first post on Ruby/Rails stuff. Twice as hard!
+
+Anyway, we're working on a Rails project, and we're experiencing the classical debate in all Rails project (at least the ones with tests!): why our test suite is so damn slow?!
+Ok, we know that ActiveRecord is one of the key components in Rails and is at the root of its philosophy of web development. And along with ActiveRecord comes the strong tight between the model and the database. So each test, even the unit tests, will touch the database (ok, technically speaking they cannot be defined unit-tests, I know. Sorry Michael Feathers for <a title="What is a unit test" href="http://www.artima.com/weblogs/viewpost.jsp?thread=126923">betraying your definition</a>).
+The very first consequence of this approach is that as your test suite grows with your project, it will become slower and slower.
+
+Let's take our current project. This is our actual test suite composition:
+<ul>
+	<li> Unit: 317 tests, 803 assertions</li>
+	<li> Functional: 245 tests, 686 assertions</li>
+	<li> Integration: 50 tests, 218 assertions</li>
+</ul>
+So we have<strong> 612 test methods</strong>, for a resulting number of <strong>1707 assertions</strong>.
+As a side note, our code-to-test ratio is 1:2.3, that is, for each line of production code we have 2.3 lines of tests.
+The suite takes about <strong>115 seconds to execute</strong> (on my MacBook Pro Core 2 Duo).
+
+So, what can we do to speed up our tests and have a more "feedback-friendly" test suite?
+The first step toward the solution of this issue is to have some metrics to reflect on, and so I developed this little ruby module to collect test duration times.
+This is how you can use it too:
+
+First, create a file called <strong>"test_time_tracking.rb"</strong> in the test folder of your Rails project. This should be its content:
+<pre style='color:#000020;background:#f6f8ff;'><span style='color:#200080;font-weight:bold;'>module</span> TestTimeTracking
+    <span style='color:#200080;font-weight:bold;'>class</span> ActiveSupport::TestCase
+      <span style='color:#200080;font-weight:bold;'>def</span> self<span style='color:#308080;'>.</span>should_track_timing?
+        <span style='color:#200080;font-weight:bold;'>not</span><span style='color:#308080;'>(</span>ENV<span style='color:#308080;'>[</span><span style='color:#1060b6;'>"tracking"</span><span style='color:#308080;'>]</span><span style='color:#308080;'>.</span><span style='color:#200080;font-weight:bold;'>nil</span>?<span style='color:#308080;'>)</span>
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+      setup :mark_test_start_time <span style='color:#200080;font-weight:bold;'>if</span> should_track_timing?
+      teardown :record_test_duration <span style='color:#200080;font-weight:bold;'>if</span> should_track_timing?
+
+      <span style='color:#200080;font-weight:bold;'>def</span> mark_test_start_time
+        @start_time <span style='color:#308080;'>=</span> Time<span style='color:#308080;'>.</span>now
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+      <span style='color:#200080;font-weight:bold;'>def</span> record_test_duration
+        File<span style='color:#308080;'>.</span><span style='color:#400000;'>open</span><span style='color:#308080;'>(</span><span style='color:#1060b6;'>"/tmp/test_metrics.csv"</span>, <span style='color:#1060b6;'>"a"</span><span style='color:#308080;'>)</span> <span style='color:#200080;font-weight:bold;'>do</span> |file|
+          file<span style='color:#308080;'>.</span><span style='color:#400000;'>puts</span> <span style='color:#1060b6;'>"#{name().gsub(/,/, '_')},#{Time.now - @start_time}"</span>
+        <span style='color:#200080;font-weight:bold;'>end</span>
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+    <span style='color:#200080;font-weight:bold;'>end</span>
+<span style='color:#200080;font-weight:bold;'>end</span>
+</pre>
+Then, edit your <strong>"test_helper.rb"</strong> (again, under the test folder), to require and include the previous module.
+E.g.
+
+*test_helper.rb*
+<pre style='color:#000020;background:#f6f8ff;'>ENV<span style='color:#308080;'>[</span><span style='color:#1060b6;'>"RAILS_ENV"</span><span style='color:#308080;'>]</span> <span style='color:#308080;'>=</span> <span style='color:#1060b6;'>"test"</span>
+  <span style='color:#400000;'>require</span> File<span style='color:#308080;'>.</span>expand_path<span style='color:#308080;'>(</span>File<span style='color:#308080;'>.</span>dirname<span style='color:#308080;'>(</span>__FILE__<span style='color:#308080;'>)</span> <span style='color:#308080;'>+</span> <span style='color:#1060b6;'>"/../config/environment"</span><span style='color:#308080;'>)</span>
+  <span style='color:#400000;'>require</span> <span style='color:#1060b6;'>"test_time_tracking"</span>
+
+  <span style='color:#200080;font-weight:bold;'>class</span> ActiveSupport::TestCase
+    include TestTimeTracking
+    <span style='color:#308080;'>.</span><span style='color:#308080;'>.</span><span style='color:#308080;'>.</span>
+</pre>
+then, all you have to do is executing your rake task with the "tracking" option set, e.g.
+<code>tracking=on rake</code>
+
+At the end of the test suite execution you'll find a CSV file (test_metrics.csv) in your /tmp folder.
+This file contains a line for each test method executed, along with its duration in seconds.
+I use to upload this file in google docs, and then apply a formula to sort out the methods from the slowest to the fastest.
+A good formula is the following:
+<code>=Sort(A2:B612, B2:B612, FALSE)</code>
+
+The main limitation in the current implementation of this module is that every time the suite is executed with rake, the new time metrics collected are appended at the end of the previous file (if it exists), so each time you should remember to move the file to a different location. I'm working on this issue, so I'm expecting to find a better solution. Stay tuned!

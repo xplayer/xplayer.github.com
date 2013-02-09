@@ -1,0 +1,32 @@
+---
+layout: post
+title: ! 'Ascoltare i propri test: quando la lunghezza di un costruttore ci puo''
+  insegnare tanto...'
+tags:
+- Design
+- Mock Objects
+- Testing
+status: publish
+type: post
+published: true
+meta: {}
+---
+Ancora una volta i post su mockobjects.com mi ricordano che c'e' molto da imparare dai propri test. E' il caso di <a href="http://www.mockobjects.com/2007/04/test-smell-bloated-constructor.html">Test Smell: Bloated Constructor</a> e <a href="http://www.mockobjects.com/2007/04/test-smell-everything-is-mocked.html">Test Smell: Everything is mocked.</a>
+
+<a href="http://xplayer.files.wordpress.com/2007/05/dscf1963.jpg" title="Bloated Constructor…"><img src="http://xplayer.files.wordpress.com/2007/05/dscf1963.thumbnail.jpg" alt="Bloated Constructor…" align="middle" /></a>
+
+Se si usa il TDD, capita di finire per avere oggetti con un costruttore gigante, che prende una lista infinita di parametri, tipicamente i peers (ovvero i collaboratori) dell'oggetto. In tali casi fare i test, e soprattutto farli coi mock, e' la morte. E in molti casi ce la si prende coi mock, rei di complicare i test.
+
+Ma spesso la difficolta' a testare un oggetto e' sintomo di problemi di design sull'oggetto stesso...  E riflettere su queste difficolta' e riportarle sul codice sotto test ci consente di migliorarne il design. O, come dice Steve Freeman, <em>being sensitive to complexity in the tests can help me clarify my designs.</em>
+
+In questo caso un costruttore lungo potrebbe indicare che magari ci sono oggetti che potrebbero essere raggruppati a formare un nuovo oggetto. Questo semplifica anche i test dell'oggetto da cui siamo partiti e consente di ridurre le sue responsabilita', tutte cose buone e giuste.
+
+Freeman usa due euristiche per l'estrazione di componenti:
+<blockquote><em>When I'm extracting implicit components, I look first for two conditions: arguments that are always used together in the class, and that have the same lifetime. That usually finds me the concept, then I have the harder task of finding a good name.</em></blockquote>
+Nel secondo post che cito all'inizio, <a href="http://www.mockobjects.com/2007/04/test-smell-everything-is-mocked.html">Test Smell: Everything is mocked</a>, si sfata un mito duro a morire: non si devono fare mock per tutte le classi che si incontrano.
+
+In particolare non e' assolutamente necessario mockizzare value objects, e soprattutto "don't mock third-party libraries!". Piuttosto, un approccio migliore e' quello di far emergere col TDD e i mock un sottile straterello di codice che faccia da adaptor verso le API esterne, e che fornisca al nostro dominio i servizi di cui ha bisogno.
+
+<img src="http://www.mockobjects.com/uploaded_images/mockable-adaptor-752684.png" height="192" width="256" />
+
+E poi testare questo thin layer con dei test di integrazione che garantiscano che ci si agganci correttamente alla libreria.
