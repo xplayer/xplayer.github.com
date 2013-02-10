@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="This is how attr_writer may be (re)implemented: [sourcecode language=&#8221;ruby&#8221;] module Kernel def attribute_writer(attribute) define_method &hellip;">
+  <meta name="description" content="This is how attr_writer may be (re)implemented: module Kernel def attribute_writer(attribute) define_method(&quot;#{attribute}=&quot;.to_sym) do | &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -103,8 +103,8 @@
 
 
 <div class="entry-content">This is how attr_writer may be (re)implemented:
-
-[sourcecode language=&#8221;ruby&#8221;]
+<p>
+<pre>
 module Kernel
   def attribute_writer(attribute)
     define_method(&quot;#{attribute}=&quot;.to_sym) do |value|
@@ -121,7 +121,8 @@ m = MyClass.new
 m.my_attribute = 23
 
 puts m.instance_variable_get &quot;@my_attribute&quot; # =&gt; 23
-[/sourcecode]
+</pre>
+
 </div>
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[XPlayer]]></title>
   <link href="http://xplayer.github.com/atom.xml" rel="self"/>
   <link href="http://xplayer.github.com/"/>
-  <updated>2013-02-10T22:54:08+01:00</updated>
+  <updated>2013-02-10T23:02:26+01:00</updated>
   <id>http://xplayer.github.com/</id>
   <author>
     <name><![CDATA[Pietro Di Bello]]></name>
@@ -20,11 +20,10 @@
     <id>http://xplayer.github.com/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader</id>
     <content type="html"><![CDATA[How handy is the attr_reader method? Very handy indeed.
 
-Never asked yourself how it may be implemented? Just do it!
-
+<p>Never asked yourself how it may be implemented? Just do it!</p>
 This is my take:
-
-[sourcecode language=&#8221;ruby&#8221;]
+<br>
+<pre>
 module Kernel
   def attribute_reader(attribute)
     define_method(attribute) do
@@ -32,7 +31,6 @@ module Kernel
     end
   end
 end
-
 
 class MyClass
   attribute_reader :my_attribute
@@ -42,7 +40,7 @@ m = MyClass.new
 m.instance_variable_set(&quot;@my_attribute&quot;, 42)
 
 puts m.my_attribute # =&gt; 42
-[/sourcecode]
+</pre>
 
 What&#8217;s yours?
 
@@ -56,8 +54,8 @@ Have fun!
     <updated>2012-02-12T00:00:00+01:00</updated>
     <id>http://xplayer.github.com/blog/2012/02/12/attr_writer</id>
     <content type="html"><![CDATA[This is how attr_writer may be (re)implemented:
-
-[sourcecode language=&#8221;ruby&#8221;]
+<p>
+<pre>
 module Kernel
   def attribute_writer(attribute)
     define_method(&quot;#{attribute}=&quot;.to_sym) do |value|
@@ -74,7 +72,8 @@ m = MyClass.new
 m.my_attribute = 23
 
 puts m.instance_variable_get &quot;@my_attribute&quot; # =&gt; 23
-[/sourcecode]
+</pre>
+
 ]]></content>
   </entry>
   
