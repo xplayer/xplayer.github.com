@@ -1,0 +1,42 @@
+---
+layout: post
+title: ! 'Learning Ruby reimplementing it: attr_reader'
+tags:
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  jabber_published: '1329057693'
+  _edit_last: '544375'
+  email_notification: '1329057694'
+---
+How handy is the attr_reader method? Very handy indeed.
+
+Never asked yourself how it may be implemented? Just do it!
+
+This is my take:
+
+[sourcecode language="ruby"]
+module Kernel
+  def attribute_reader(attribute)
+    define_method(attribute) do
+      instance_variable_get(&quot;@#{attribute}&quot;)
+    end
+  end
+end
+
+
+class MyClass
+  attribute_reader :my_attribute
+end
+
+m = MyClass.new
+m.instance_variable_set(&quot;@my_attribute&quot;, 42)
+
+puts m.my_attribute # =&gt; 42
+[/sourcecode]
+
+What's yours?
+
+Have fun!

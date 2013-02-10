@@ -1,0 +1,33 @@
+---
+layout: post
+title: Law Of Demeter
+tags:
+- OOPrinciples
+status: publish
+type: post
+published: true
+meta: {}
+---
+Di recente ho seguito un thread intitolato <a href="http://tech.groups.yahoo.com/group/extremeprogramming/messages/122627?threaded=1&amp;m=e&amp;var=1&amp;tidx=1" title="link al thread">"The Law of Demeter and Testability"</a> sulla lista xp americana.
+
+A partire dal primo post di <a href="http://www.jayflowers.com/WordPress/">Jay Flowers</a> (niente di travolgente), il discorso si e' poi spostato sulla legge di demeter di per se', il cui 'peso' personalmente non ho mai capito fino in fondo. Ne' tantomeno mi sembra che se ne parli molto, al contrario magari di altri principi piu' noti come OCP, DIP, LSP, SRP, eccetera.
+
+Alcuni messaggi di questo thread mi hanno fatto capire meglio questo 'principio' (chiamarla legge fa un po' ridere) e a vederlo in un'ottica diversa.
+
+Vi sottopongo gli spunti piu' interessanti, sperando possano esservi di stimolo quanto lo sono stati per me
+
+Michael Feathers:
+<blockquote><em> It's a great article, but the thing to remember about LoD is that it is not iron-clad. There are cases where you're better off not having demetered code. The classic example is the Excel Object model. You get the workbook from the application and the worksheet from the workbook, and drill down through ranges to cells. It works because the model is very stable. </em>
+
+<em>In general, when the structure of data has meaning, LoD gets in the way; when you care more about behavior (and usually you can), LoD is the way to go. </em></blockquote>
+Ron Jeffries:
+<blockquote><em> Yes ... the observation about structure is a good one. If you think of what you'd have to do, otherwise, with the Excel model, you'd have to make each call to Excel, parameterized with workbook name, worksheet name, maybe range, then cell. Pulling the innards out amounts to an addressing prefix, or stepping down through a hierarchy.</em></blockquote>
+<blockquote><em>Mostly, though, I'd say LoD is the way to bet. </em></blockquote>
+E infine Brad Appleton:
+<blockquote><em>I actually took a class from Dr. Lieberherr on the full Demeter method (of which LoD is one small part). Having had the benefit of that, I think I have a lot of additional insight into the above.
+</em></blockquote>
+<blockquote><em>The issue with the LoD is that, the way it is usually stated, the assumption is any/every class in an O-O program should be exhibiting functional behavior and hiding the details of what it contains, and how it contain them.</em></blockquote>
+<blockquote><em>There are classes whose job is to encapsulate functional behavior/services, and there are classes whose job is to encapsulate structural behavior/services. That is to say that for some classes, the "secret" they need to "hide" isnt the fact that they contain some kinds of objects, but the details of HOW they contain those objects.
+Simple examples of these would be data-structures, lists, collections, iterators, dictionaries, data-stores, etc. Accessing the interfaces of the objects contained by such encapsulated structures actually doesnt violate the principle behind the LoD. But because of the way LoD is stated in such an oversimplified manner, those things appear to be violations when they really arent.</em></blockquote>
+<blockquote><em>When a method-call returns a subobject of its containing object, then consider that invocation to be a violation of LOD *only* *if* the containing object is supposed to encapsulate behavior concerning its subobjects. If the object really only needs to encapsulate structural details about HOW it contains that object (rather than WHAT it contains), then it's not really a violation of LoD.</em></blockquote>
+<blockquote><em>So it's less about whather or not the caller cares about the behavior or structure of the data, it more about whather the callee cares about (should be encapsulating) the behavior or the structure of what it contains. </em></blockquote>

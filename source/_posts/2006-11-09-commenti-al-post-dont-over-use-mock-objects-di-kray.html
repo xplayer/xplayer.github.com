@@ -1,0 +1,21 @@
+---
+layout: post
+title: Commenti al post "Don't Over-Use Mock Objects" di K.Ray
+tags:
+- Mock Objects
+- Testing
+status: publish
+type: post
+published: true
+meta: {}
+---
+<font size="2">Tempo fa <a href="http://blogs.codehaus.org/people/theboxx/" title="blog di Giuliano">Giuliano </a>aveva segnalato questo post di K.Ray: <a href="http://homepage.mac.com/keithray/blog/2006/10/31/#DontOverUseMockObjects" title="Don't OverUse MockObjects">Don't Over-Use Mock Objects</a></font>
+
+<font size="2">Mi sembra che le tesi dell'articolo siano un po' forti (<em>"Avoid them. Mocks make your tests more fragile and more tightly-coupled. And at the same time, they reduce the integration-test aspects of TDD. They make your tests larger and more complicated and less readable."</em>). Certo, se usati male possono dare problemi di fragilita' eccessiva del test e di leggibilita' (a meno che non si usi un po' di literate programming con jMock), e soprattutto se non si usano per riflettere su eventuali debolezze del proprio codice (a questo riguardo il blog su <a href="www.mockobjects.com">www.mockobjects.com</a> fa spesso illuminanti esempi di codice che usa scorrettamente i mock).</font>
+
+<font size="2">L'obiezione che i mock ridurrebbero la robustezza dei test e' debole (<em>"If you change an object's API, a mock object's API may not change, making your tests out-of-date with respect to your non-test code"</em>), perche' con EasyMock si usano le API 'vere', pertanto non esite la possibilita' di avere dei metodi 'out of date' (non so come funzioni invece jMock).</font>
+
+<font size="2">L'unica osservazione secondo me con un certo fondamento e' la critica al modo di procedere degli interaction-based testers (<em>"In TDD, you normally write a test, write some code in a target class/method that passes the test. The third step is refactoring. ... Test-Driving with Mocks inverts that order: you create your target class and a mock class up-front, and plan on how they interact, instead of evolving that interaction in TDD's refactoring steps. You pre-judge the class design rather than evolve it."</em>). Anche a me suona innaturale di norma procedere come gli interaction-based testers, ma penso anche che ci siano casi in cui questa 'esplorazione' delle interazioni e' utile.
+Suonera' un po' eccessivo, ma qualcuno diceva che la programmazione dei mock in un test e' un po' come un sequence diagram sotto forma di codice! :-)</font>
+
+<font size="2">Siamo invece d'accordo che i mock sono utili per rendere piu' indipendenti i test (<em>"Mocks are tool for decoupling, and I do sometimes use them. I limit my use of Mocks to those situations where the real object will not reliably do what I want. Examples: simulating errors in writing a file; simulating connections with a remote server; simulating errors from remote server."</em>).</font>

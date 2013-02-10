@@ -1,0 +1,27 @@
+---
+layout: post
+title: Fixing SeleniumRC to work with Firefox 3.6
+tags:
+- Rails
+- Selenium
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+  _wp_old_slug: fixing-seleniumrc-to-working-with-firefox-3-6
+---
+The brand new release of Firefox 3.6 brings, together with some improvements in the browser, also some headaches for all selenium users: actually the latest selenium RC jar (selenium-server.jar) won't work with Firefox 3.6.
+
+The problem is related to the addons that Selenium will pretend to have in the Firefox instance fired up when Selenium RC server starts. As a matter of fact, those two addons are not declared to be compatible with 3.6.
+
+The simple fix is then to edit the addons' install.rdf files in the selenium-server.jar to manually set the compatibility to 3.6.
+
+Alternatively, you can download <a href="http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar">this patched jar</a> from <a href="http://github.com/saucelabs/saucelenium/">this</a> repository, rename it to selenium-server.jar and replace the previous jar with this.
+
+The actual steps to fix my webrat gem (I use Selenium through Webrat) were
+<ol>
+	<li>download the above mentioned file (http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar)</li>
+	<li>rename it to selenium-server.jar</li>
+	<li>replace the previous file in the vendor folder of your webrat gem (mine was /usr/local/lib/ruby/gems/1.8/gems/webrat-0.7.0/vendor/selenium-server.jar)</li>
+</ol>

@@ -1,0 +1,138 @@
+---
+layout: post
+title: My first test using webdriver (aka Selenium 2.0)!
+tags:
+- Rails
+- Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+<div>
+<div>
+
+<a rel="nofollow" href="http://www.the-arm.com/2010/02/suffering-of-selenese-flu-try-webdriver/">As many say</a>, a good solution to <em>selenese flu</em> is <strong>Webdriver</strong> (see more at <a rel="nofollow" href="http://code.google.com/p/selenium">http://code.google.com/p/selenium</a>).
+
+Webdriver has been accepted by the Selenium guys as the new approach  to web application testing, opposed to the classical "selenium 1.0"  approach, based on a javascript driver, which suffers from way too many  issues.
+Unfortunately, Selenium 2.0, which plan to fully support Webdriver, is  still on an alpha release, and actually is very difficult to find  ruby-based web testing tools supporting this alpha version of selenium  2.0.
+One of those tools is actually Watir (though Webrat too is planning to  support Selenium 2.0 sooner or later), and more precisely <a rel="nofollow" href="http://github.com/jarib/watir-webdriver">this  project</a> is quite stable to allow a first test drive.
+
+So this is what I did:
+
+First: installed required gems
+<div>
+<div>
+<pre>  sudo gem install selenium-webdriver
+  sudo gem install watir-webdriver --pre
+</pre>
+</div>
+</div>
+Second: configure my Rails testing configuration to use watir
+<div>
+<div><strong>config/environments/test.rb</strong></div>
+<div>
+<pre>  ...
+  config.gem "watir-webdriver"
+  ...
+</pre>
+</div>
+</div>
+<div>
+<div><strong>test/test_helper.rb</strong></div>
+<div>
+<pre>  require 'test_help'
+  ...
+  require 'watir-webdriver'
+  ...
+</pre>
+</div>
+</div>
+Third: write a test
+<div>
+<div><strong>test/integration/paypal_integration_test.rb</strong></div>
+<div>
+<pre>require 'test_helper'
+
+class PaypalIntegrationTest &lt; ActionController::IntegrationTest
+  include LocaleHelper
+  self.use_transactional_fixtures = false
+
+  def setup
+    ... some setup stuff here ...   
+    @browser = Watir::Browser.new(:firefox)
+  end
+
+  def teardown
+    @browser.close
+  end
+
+  test "something interesting" do
+    @browser.goto "https://developer.paypal.com/"
+    @browser.text_field(:name, "login_email").set "my_test_account@sourcesense.com"
+    @browser.text_field(:name, "login_password").set "mysecret"
+    @browser.button(:name, "submit").click
+
+    @browser.goto "https://localhost"
+
+    @browser.link(:id, 'loginlink').click
+    @browser.text_field(:name, "email").set @user.email
+    @browser.text_field(:name, "password").set @user.password
+    @browser.button(:text, "Login").click
+
+    # add_a_product_to_cart
+    product = Factory(:product, :code =&gt; "a code", :categories =&gt; [@juve_store])
+    Factory(:product_variant, :code =&gt; "03", :availability =&gt; 99, :product =&gt; product)
+    @browser.goto "https://localhost/frontend/products/show/#{product.id}"
+    @browser.button(:id, "add_to_cart").click
+
+    @browser.link(:text, "Checkout").click
+    @browser.link(:id, "gotobuy").click
+
+    # choose "Paypal"
+    @browser.radios.last.set
+
+    @browser.link(:id, "gotobuy").click
+
+    sleep 5
+    assert @browser.text.include?("Payment for order #{last_order_number()}")
+
+    @browser.text_field(:name, "login_email").set "my_test_buyer@sourcesense.com"
+    @browser.text_field(:name, "login_password").set "yetanothersecrethere"
+    @browser.button(:text, "Accedi").click
+    @browser.button(:text, "Paga ora").click
+
+    sleep 5
+    assert @browser.text.include?("Il pagamento è stato inviato")
+
+    @browser.button(:id, "merchantReturn").click
+    assert_contain_waiting("Your purchase")
+    assert_contain_waiting(last_order_number())
+
+  end
+
+private
+
+  def last_order_number
+    Order.last ? Order.last.number : ""
+  end
+
+end
+</pre>
+</div>
+</div>
+Some comments here:
+<ul>
+	<li>This is a spike, so please don't say this test is too long and not  well refactored <img src="https://dev.sourcesense.com/confluence/images/icons/emoticons/smile.gif" border="0" alt="" width="20" height="20" align="absmiddle" /></li>
+	<li>I had to put two sleep calls in two places (I gotta say that this  specific test, involving paypal sandbox, is really slow due to the  slowness in the paypal response time).</li>
+	<li>Anyway, this alpha version of webdriver is still lacking: I cannot  say wheather this is a problem I'll have even with future (possibly more  stable) version of Webdriver.</li>
+</ul>
+Some references:
+<ul>
+	<li><a rel="nofollow" href="http://zeljkofilipin.com/2010/01/12/watir-on-webdriver/">http://zeljkofilipin.com/2010/01/12/watir-on-webdriver/</a></li>
+	<li><a rel="nofollow" href="http://developer-in-test.blogspot.com/2010/01/chromewatir-watir-webdriver-update.html">http://developer-in-test.blogspot.com/2010/01/chromewatir-watir-webdriver-update.html</a></li>
+	<li><a rel="nofollow" href="http://jarib.github.com/watir-webdriver/doc/index.html">http://jarib.github.com/watir-webdriver/doc/index.html</a></li>
+</ul>
+</div>
+</div>

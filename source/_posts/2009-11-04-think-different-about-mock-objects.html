@@ -1,0 +1,54 @@
+---
+layout: post
+title: Think different about mock objects!
+tags:
+- Design
+- Mock Objects
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+<div>Recently, after the post on mock objects by Uncle Bob (<a href="http://blog.objectmentor.com/articles/2009/10/28/manual-mocking-resisting-the-invasion-of-dots-and-parentheses" target="_blank">"Manual Mocking: Resisting the Invasion of Dots and Parentheses"</a>), a rather long discussion thread grown in the extreme programming italian newsgroup (starting <a href="http://it.groups.yahoo.com/group/extremeprogramming-it/message/7224" target="_blank">here</a>, but careful, it's in italian, sorry!).</div>
+<div>This led me to think more deeply about my experience with mock objects, and I'd like to share my point of view here, as it's quite different (or so it seems to me) from the common opinions on this important topic.</div>
+<p>
+<div>I've always followed the so-called (as Giuliano would say, isn't it <a href="http://thinkingbox.wordpress.com/" target="_blank">Giuliano</a>? :-) "English School" of mock objects, the one coming from the pioneering works of <a href="http://www.planningcards.com/iterex/blog.html" target="_blank">Tim Mackinnon</a>,<a href="http://www.m3p.co.uk/blog/" target="_blank"> Steve Freeman</a> and <a href="http://www.natpryce.com/" target="_blank">Nat Pryce</a>, the real fathers of mock objects.</div>
+<p>
+<div>And I've always carefully followed their advice, first through their *epic* paper  <strong>"Mock Roles, not Objects"</strong> (<a href="http://www.jmock.org/oopsla2004.pdf" target="_blank">http://www.jmock.org/oopsla2004.pdf</a>) - IMHO the best paper on mock objects and on object oriented programming with mocks - then through their terrific posts on the blog <a href="http://www.mockobjects.com/" target="_blank">www.mockobjects.com</a>, and finally, through their first (and brand new) book, <a href="http://www.amazon.com/Growing-Object-Oriented-Software-Guided-Tests/dp/0321503627" target="_blank">"Growing Object-Oriented Software, Guided by Tests"</a>.</div>
+<p>
+<div>One thing I learn is that <strong>mock objects are a design tool</strong>, while many people see it only as a technique for speeding up unit tests.</div>
+<div>And in this context mock objects are a key tool to support your TDD process, especially in test-driving your domain model, where you follow a process similar to traditional top-down development, in which you start from the highest level of abstraction and then proceed, layer by layer, to reach the core of the domain and then move again towards the boundary of the system, towards the "services" (you can find many similarities in <a href="http://alistair.cockburn.us/Hexagonal+architecture" target="_blank">Cockburn's approach to Hexagonal Architecture</a>).</div>
+<p>
+<div>Then, when you reach the domain boundary, you should stop using mocks.</div>
+<div>Mock objects are useful to TDDing the thin adapter layers to your services (that is, third-party libraries or external components (e.g. a database, a JMS queue, ...). But then, the actual adapters will be tested with integration testing.</div>
+<p>
+<div>Why?</div>
+<p style="padding-left:30px;">Because you should use mock objects as far as you can apply TDD, whereas you can design and *discover* interfaces (and roles), and assign responsibility. On the other hand, in front of a third-party library you cannot follow this process, since the code is not under your control, and you cannot modify it.</p>
+<p>
+<div style="padding-left:30px;">Because if you use mock objects with third-party libraries (two concrete examples taken from our recent projects: isolating our tests from the database in a Rails app, or in a java app using Hibernate ORM), you'll write tests that *guess* the library behaviour, and your guesses may be far away from the actual behaviour.</div>
+<div style="padding-left:30px;">Raise your hands if you never burnt your fingers with this kind of test with mocks, where maybe you *thought* you had a save() method to return an A object while in fact it returned B object! :)</div>
+<p>
+<div style="padding-left:30px;">And finally, because this kind of tests with mocks end up to be long, unreadable and fragile (an "invasion of dots and parentheses" reported by Uncle Bob in his post), full of mocks and mock expectations. And, hey, you cannot refactor them, since you don't own the third-party code!</div>
+<BR>
+To verify the correct integration with libraries or external components, which are out of you domain, as well as with integration tests, you may use <a href="http://xunitpatterns.com/Fake%20Object.html" target="_blank">fake</a>s or <a href="http://xunitpatterns.com/Test%20Stub.html" target="_blank">stub</a>s (and, by the way, the example in the Uncle Bob's post is actually a stub, not a "hand-rolled mock").
+<p>
+<div>So, I'll repeat myself, following this "mocks as a design tool" approach, you'll <a href="http://www.mockobjects.com/2007/04/test-smell-everything-is-mocked.html" target="_blank">mock only types you own</a>.</div>
+<p>
+<div>Some useful references to study this topic in depth (you'll be OK even if you read just the first 2-3 links :-)</div>
+<div>
+<ul>
+	<li><a href="http://www.jmock.org/oopsla2004.pdf" target="_blank">http://www.jmock.org/oopsla2004.pdf</a> (I'm quoting again this paper, because it's a *really* good starting point to understand this approch to mock objects)</li>
+	<li><a href="http://www.mockobjects.com/2007/04/test-smell-everything-is-mocked.html" target="_blank">http://www.mockobjects.com/2007/04/test-smell-everything-is-mocked.html</a> (if you like to deepen the "Don't mock third-party libraries" and "Don't mock value objects" topics)</li>
+	<li><a href="http://www.mockobjects.com/2006/10/tell-dont-ask-and-mock-objects.html" target="_blank">http://www.mockobjects.com/2006/10/tell-dont-ask-and-mock-objects.html</a></li>
+	<li><a href="http://www.mockobjects.com/2006/10/jmock-listening-to-opinionated.html" target="_blank">http://www.mockobjects.com/2006/10/jmock-listening-to-opinionated.html</a></li>
+	<li><a href="http://www.mockobjects.com/2006/09/like-fire-drill.html" target="_blank">http://www.mockobjects.com/2006/09/like-fire-drill.html</a></li>
+	<li><a href="http://www.mockobjects.com/2007/04/test-smell-bloated-constructor.html" target="_blank">http://www.mockobjects.com/2007/04/test-smell-bloated-constructor.html</a></li>
+	<li><a href="http://www.mockobjects.com/2007/04/test-smell-i-need-to-mock-object-i-cant.html" target="_blank">http://www.mockobjects.com/2007/04/test-smell-i-need-to-mock-object-i-cant.html</a></li>
+	<li><a href="http://www.mockobjects.com/files/evolving_an_edsl.ooplsa2006.pdf" target="_blank">http://www.mockobjects.com/files/evolving_an_edsl.ooplsa2006.pdf</a> (yet another paper, very good)</li>
+	<li> and if you want to know more about the history of mock objects: <a href="http://www.mockobjects.com/2009/09/brief-history-of-mock-objects.html" target="_blank">http://www.mockobjects.com/2009/09/brief-history-of-mock-objects.html</a></li>
+</ul>
+I hope I give you some useful feedback on this topic!
+
+</div>
+<div>And, by the way, feedbacks are warmly welcome!</div>

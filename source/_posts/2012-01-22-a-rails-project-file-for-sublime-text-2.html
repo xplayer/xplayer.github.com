@@ -1,0 +1,38 @@
+---
+layout: post
+title: A Rails project file for Sublime Text 2
+tags:
+- Ruby
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+  jabber_published: '1327189144'
+  email_notification: '1327189144'
+---
+The simplest thing that you can do to open up the <a href="http://www.sublimetext.com/" target="_blank">Sublime Text 2</a> editor on your Rails project is to just type in
+<pre>$ subl .</pre>
+on the Rails root directory¹.
+
+A slightly better solution is to create a .sublime-project file in your project root directory, so that you may launch the editor with something like
+<pre>$ subl --project my_rails_project.sublime-project</pre>
+A question then arises, "How do I exclude useless directories as tmp or log from the project file?"
+
+Answer: just edit the sublime-project file this way:
+<pre>{
+ "folders":
+ [
+   {
+     "path": ".",
+     "folder_exclude_patterns": ["tmp", "log"],
+     "file_exclude_patterns": [".tmtags"]
+   }
+ ]
+}</pre>
+(and of course you should adapt it to your actual preferences on what to exclude from your project).
+
+Note that you can also specify a <strong>"file_exclude_patterns"</strong> property to filter out some files (in my case I wanted to exclude the ctag index file).
+<ol>
+	<li>to install the command line tool, just follow the docs <a href="http://www.sublimetext.com/docs/2/osx_command_line.html">here</a>.</li>
+</ol>

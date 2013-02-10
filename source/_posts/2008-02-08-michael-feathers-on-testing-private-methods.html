@@ -1,0 +1,23 @@
+---
+layout: post
+title: Michael Feathers on testing private methods
+tags:
+- Design
+- objectoriented
+- Testability
+- Testing
+status: publish
+type: post
+published: true
+meta: {}
+---
+Da <a href="http://www.infoq.com/news/2008/01/private-methods-tdd-design">un articolo di InfoQ,</a> la posizione di M.Feathers sul testare i metodi privati:
+
+Michael Feathers suggested last year in <a href="http://michaelfeathers.typepad.com/michael_feathers_blog/2007/09/the-deep-synerg.html">The Deep Synergy Between Testability and Good Design</a> that TDD encourages good design and, conversely, code that is not testable should make us think twice:
+<blockquote><i>When I write tests and I have the urge to test a private method, I take it as a hint. The hint tells me that my class is encapsulating so much that it has ceased to be "understandable" by tests through its public interface. I listen to the hint, and factor my design differently. Usually, I end up moving the private method (and possibly some methods around it) to a new class where it can be non-private and accessible to tests.</i></blockquote>
+Condivido al 100%!
+
+E interessante anche quello che dice dopo, nel post originale, riguardo alla relazione tra coupling, cohesion e testabilita'.
+<blockquote><i>In the end, it all comes down to cohesion and coupling.  If classes are deeply coupled with their neighbors, it is hard to control them in a test or observe them independently.  If a class isn't cohesive, it may have some logic which is not easily exercisable through its public interface.</i>
+
+<i>It seems that reverse is true also.  Classes which are hard to instantiate and use in a test harness are more coupled than they could be, and classes with private methods that you feel the urge to test, invariably have some sort of cohesion problem: they have more than one responsibility.</i></blockquote>

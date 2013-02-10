@@ -1,0 +1,43 @@
+---
+layout: post
+title: assert_select_rjs reloaded!
+tags:
+- Rails
+- Testing
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+  jabber_published: '1284673854'
+  _wp_old_slug: ''
+---
+<div id="_mcePaste">If you ever dared to unit-test a Rails RJS action, for example something like this:</div>
+<blockquote>
+<pre>def my_ajax_action
+   ...
+   render(:update) do |page|
+     page.replace_html 'shoppinglist', :partial =&gt; 'cart'
+     page.replace_html 'items', :partial =&gt; 'layouts/items', :locals =&gt; { :cart =&gt; @cart }
+   end
+end</pre>
+</blockquote>
+<div id="_mcePaste">you may already know and use the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> testing helper, which basically will verify the structure of your RJS response.</div>
+This testing method may really help you shortening the TDD feedback loop in an AJAX-based Rails webapp, and then you'll may even be confident enough and save one or two brittle Selenium tests.
+<div>The only problem with <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> is that is (IMHO) poorly documented and rarely googled about.</div>
+<div id="_mcePaste">So, this is my turn to give back what we discovered.</div>
+If you have a Rails webapp using jQuery as javascript framework, you may have a hard time using <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> correctly, and this is why:
+<div id="_mcePaste">for jQuery, this is the correct way to use <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>:</div>
+<blockquote>
+<pre>assert_select_rjs :replace_html, '#shoppinglist'</pre>
+</blockquote>
+<div>it's important the '#' prefix here to refer to DOM element IDs, since the notation without '#' will work only if your app uses Prototype.</div>
+<div id="_mcePaste">Another nice thing to know is the way to make assertion on the selection matched by the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>.</div>
+<div id="_mcePaste">For example, this code</div>
+<blockquote>
+<pre>assert_select_rjs :replace_html, '#shoppinglist' do
+    assert_select '#shipping_cost_description', /Shipping costs for France/
+    assert_select '#shipping_cost_value', /&amp;euro; 12,30/
+end</pre>
+</blockquote>
+<div>will verify that the section replaced inside the 'shoppinglist' element will match the two followings assetions.</div>

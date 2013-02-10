@@ -1,0 +1,48 @@
+---
+layout: post
+title: Come generare il report HTML dei test eseguiti con Jmeter
+tags:
+- Jmeter
+- tips
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '544375'
+---
+<strong>Problema</strong>: <em>"Ho problemi con il report html dei test jmeter generato dalla trasformazione XSL indicata dalla documentazione di Jmeter (versione 2.3.4). Infatti nel report html si hanno due comportamenti anomali:</em>
+<ul>
+	<li><em>la prima riga è sempre raddoppiata, ovvero presente due volte (e vabbè, passi)</em></li>
+	<li><em>le colonne che indicano i tempi massimi e minimi non sono valorizzate (NaN)"</em></li>
+</ul>
+<strong>Soluzione</strong>: <em>"Il problema è nella versione di Xalan inclusa di default nel JRE 1.5 e 1.6 di java. Si deve usare Xalan-J 2.4.1"</em>
+
+<strong>Descrizione più dettagliata</strong>:
+
+Tutto è nato con dei test di carico e performance che stiamo eseguendo in questo periodo.
+Jmeter, di cui usiamo la versione 2.3.4, esporta il report del test plan in formato XML (o CSV se specificato). Per convertirlo in un HTML più comodamente fruibile si deve effettuare una trasformazione XSL, e per fortuna Jmeter mette a disposizione degli stylesheet apposta per questo (si trovano nel folder /extras dell'installazione di Jmeter).
+
+Detto, fatto. Il comando che eseguo dovrebbe essere (ad esempio)
+<pre style="padding-left:30px;">java org.apache.xalan.xslt.Process
+  -IN jmeterResults.xml
+  -XSL ~/work/jakarta-jmeter-2.3.4/extras/jmeter-results-report_21.xsl
+  -OUT jmeterResults.html</pre>
+
+Purtroppo questa trasformazione non funziona, o meglio, produce un HTML incompleto (vedi sezione "Problema").
+
+Dopo diversi tentativi, ho scoperto la soluzione, grazie ad un commento a <a href="http://jlorenzen.blogspot.com/2008/03/automated-performance-tests-using.html">questo post</a>: usando la <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/xalan/xalan/2.4.1/">versione 2.4.1 di Xalan-J</a> l'HTML prodotto è completo.
+
+Per la cronaca, per lanciare la trasformazione XSL a linea di comando specificando una propria versione di Xalan, basta fare così
+<pre style="padding-left:30px;">java
+<strong>  -cp xalan-2.4.1.jar</strong> org.apache.xalan.xslt.Process
+  -IN log.jtl
+  -XSL ../extras/jmeter-results-report_21.xsl
+  -OUT foo.html</pre>
+<span style="font-family:Georgia, 'Times New Roman', 'Bitstream Charter', Times, 0;font-size:small;"><span style="line-height:19px;white-space:normal;">
+</span></span>
+<span style="font-family:Georgia, 'Times New Roman', 'Bitstream Charter', Times, 0;line-height:19px;white-space:normal;font-size:13px;">E in ant (cosa che interessava me in particolare, perchè lanciavamo jmeter da ant)</span>
+<pre style="padding-left:30px;">&lt;xslt
+  in="${scenario.target.path}/scenario-result.xml"
+  out="${scenario.target.path}/AggregateReport.html"
+  style="${jmeter.home}/extras/jmeter-results-report_21.xsl"
+<strong>  classpath="${basedir}/../xalan-2.4.1.jar"</strong> /&gt;</pre>
