@@ -13,11 +13,10 @@ meta:
 ---
 How handy is the attr_reader method? Very handy indeed.
 
-Never asked yourself how it may be implemented? Just do it!
-
+<p>Never asked yourself how it may be implemented? Just do it!</p>
 This is my take:
-
-[sourcecode language="ruby"]
+<br>
+<pre>
 module Kernel
   def attribute_reader(attribute)
     define_method(attribute) do
@@ -25,7 +24,6 @@ module Kernel
     end
   end
 end
-
 
 class MyClass
   attribute_reader :my_attribute
@@ -35,7 +33,7 @@ m = MyClass.new
 m.instance_variable_set(&quot;@my_attribute&quot;, 42)
 
 puts m.my_attribute # =&gt; 42
-[/sourcecode]
+</pre>
 
 What's yours?
 
