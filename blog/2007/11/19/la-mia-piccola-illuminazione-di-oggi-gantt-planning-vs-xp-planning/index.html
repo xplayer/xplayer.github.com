@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>La mia piccola illuminazione di oggi: GANTT planning vs XP planning - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="La mia piccola illuminazione di oggi riguarda il modo tradizionale di pianificare e gestire un progetto software, ovvero con un bel GANTT e MS &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2007/11/19/la-mia-piccola-illuminazione-di-oggi-gantt-planning-vs-xp-planning/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">La Mia Piccola Illuminazione Di Oggi: GANTT Planning vs XP Planning</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-11-19T00:00:00+01:00" pubdate data-updated="true">Nov 19<span>th</span>, 2007</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">La mia piccola illuminazione di oggi riguarda il modo tradizionale di pianificare e gestire un progetto software, ovvero con un bel <a href="http://en.wikipedia.org/wiki/Gantt_chart">GANTT</a> e MS Project.
+
+Per la prima volta ho dovuto analizzare il GANTT per la nuova release di un progetto su cui sto lavorando, e rivedere alcune attivita&#8217; a nostro carico per capire se mancava qualcosa e verificare le dipendenze e le stime. Ci mancherebbe, se c&#8217;e&#8217; da fare, si fa&#8217;, ma ho sentito pian piano sorgere un senso di frustrazione&#8230;
+Ho poi capito il senso di fastidio che provavo: il GANTT (almeno, questo GANTT) e&#8217; piuttosto &#8220;tecnical-task centrico&#8221;, ovvero organizza le attivita&#8217; &#8220;tecniche&#8221;, ma non considera in nessun modo le features dal punto di vista del customer.
+
+Tutto il contrario della pianificazione in XP, che e&#8217; &#8220;business-value centrica&#8221;, ovvero usa le user stories (&#8220;units of customer-visible functionality&#8221;) per pianificare pezzi di funzionalita&#8217;, a prescindere poi dai task tecnici che possono esserci dietro (e che vanno certo esplicitati, se e&#8217; il caso, ma che non hanno valore di business di per se&#8217;).
+
+Ma perche&#8217; questa differenza?
+
+Forse questo e&#8217; dovuto al fatto che, mentre il GANTT e&#8217; uno strumento <u>del project manager</u> per guidare il team di sviluppo (il customer lo vedra&#8217; mai?), le user stories sono invece uno strumento <u>del customer</u> per guidare lo stesso team.
+In altre parole la pianificazione in XP coinvolge in prima persona il team dei customers (project manager, product manager, marketing, utenti, &#8230;), mentre in un progetto tradizionale la dinamica e&#8217; del tipo &#8220;eccoti le specifiche, ci si rivede a fine progetto&#8221;.
+
+Sta di fatto che io, abituato a ragionare innanziutto per user stories, mi sono ritrovato piuttosto a disagio a ragionare per task tecnici, perche&#8217; facevo fatica a vederci dietro le funzionalita&#8217;, e  spesso anzi trovavo che la somma dei task tecnici non bastava a coprire la funzionalita&#8217; che il sistema dovrebbe realizzare.
+
+E&#8217; un po&#8217; come descrivere un quadro attraverso la somma dei tratti del pennello che lo compongono&#8230; si rischia di perdere il senso complessivo dell&#8217;opera.
+Il rischio nel caso del software e&#8217; quello perdere tra i tanti task tecnici i veri obbiettivi di una feature, ovvero produrre qualcosa che risponde a delle necessita&#8217; del customer.
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-11-19T00:00:00+01:00" pubdate data-updated="true">Nov 19<span>th</span>, 2007</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2007/11/19/la-mia-piccola-illuminazione-di-oggi-gantt-planning-vs-xp-planning/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2007/11/19/la-mia-piccola-illuminazione-di-oggi-gantt-planning-vs-xp-planning/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2007/11/16/come-object-mentor-guida-la-transizione-xp-dai-propri-clienti/" title="Previous Post: Come Object Mentor guida la transizione XP dai propri clienti">&laquo; Come Object Mentor guida la transizione XP dai propri clienti</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2007/11/26/il-mio-feedback-sullagile-day-2007/" title="Next Post: Il mio feedback sull'agile day 2007">Il mio feedback sull'agile day 2007 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

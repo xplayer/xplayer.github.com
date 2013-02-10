@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Come fare integration test su un plugin per Jira 3.13.4 - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="Quando si tratta di voler scrivere test di integrazione per il vostro meraviglioso plugin per Jira 3.13.4 (l&#8217;ultima versione di Jira, in attesa &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2009/07/08/come-fare-integration-test-su-un-plugin-per-jira-3-13-4/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Come Fare Integration Test Su Un Plugin Per Jira 3.13.4</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-07-08T00:00:00+02:00" pubdate data-updated="true">Jul 8<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">Quando si tratta di voler scrivere test di integrazione per il vostro meraviglioso plugin per Jira 3.13.4 (l&#8217;ultima versione di Jira, in attesa che la 4.0 esca dalla beta), ci si imbatte in una serie di problemi.
+Dopo qualche indagine, sono riuscito a risolverli tutti, e mi accingo a condividere la soluzione adottata, nella speranza che possa servire a qualcun altro (anche a me stesso tra qualche mese&#8230;).
+
+Premetto che stiamo sviluppato il plugin usando maven2, che per questo genere di cose è davvero molto comodo.
+Se avete qualche dubbio, ecco due riferimenti:
+<ul>
+	<li><a title="How to Build an Atlassian Plugin" href="http://confluence.atlassian.com/display/DEVNET/How+to+Build+an+Atlassian+Plugin">http://confluence.atlassian.com/display/DEVNET/How+to+Build+an+Atlassian+Plugin</a></li>
+	<li><a title="Testing your plugin" href="//confluence.atlassian.com/display/DEVNET/Testing+your+plugin">http://confluence.atlassian.com/display/DEVNET/Testing+your+plugin</a></li>
+</ul>
+Il pom.xml generato da maven usando l&#8217;archetipo per plugin di Jira contiene una sezione &#8220;properties&#8221; che, all&#8217;inizio, si presenta così:
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;">&lt;properties&gt;
+&lt;atlassian.plugin.key&gt;
+com.sourcesense.jira.plugin.MyWonderfulPluginToSaveTheWorld
+&lt;/atlassian.plugin.key&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!&#8211; JIRA version &#8211;&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.version&gt;3.13&lt;/atlassian.product.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!&#8211; JIRA functional test library version &#8211;&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.test-lib.version&gt;3.13&lt;/atlassian.product.test-lib.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;!&#8211; JIRA data version &#8211;&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;"> &lt;atlassian.product.data.version&gt;3.13&lt;/atlassian.product.data.version&gt;</span>
+
+<span style="font-family:Consolas, Monaco, 'Courier New', Courier, monospace;line-height:18px;font-size:12px;white-space:pre;">&lt;/properties&gt;</span>
+
+Qui trovate una <a href="http://confluence.atlassian.com/display/DEVNET/Testing+your+plugin#Testingyourplugin-SystemProperties">descrizione di queste properties</a>, assieme ai loro valori di default.
+
+Ecco un estratto:
+<p style="padding-left:20px;"><em><strong>&#8220;atlassian.product.version&#8221; </strong>- version of the Atlassian product to compile and test against.</em></p>
+<p style="padding-left:20px;"><em><strong>&#8220;atlassian.product.data.version&#8221;</strong> - version of the test resource bundle that contains the basic Atlassian product configuration data for the integration test environment. These versions mimic the actual Atlassian product versions. However we might only modify and release the relevant projects for the reasons of non-backwards compatibility of the new versions of Atlassian products. Therefore not every version of Atlassian products will have a corresponding version of the resource bundle.</em></p>
+La property <strong>&#8220;atlassian.product.test-lib.version&#8221;</strong> non è documentata, e per capire il suo significato dovete chiedere a Google, che vi rispondera&#8217; con <a href="http://www.customware.net/repository/display/ATLASSIAN/Integration+Testing+of+Confluence+Plugins">questa utile pagina</a>.
+<p style="padding-left:20px;"><em><strong>&#8220;atlassian.product.test-lib.version&#8221;</strong> - The version of the testing library to use, as a general recommendation you should at least use version 2.0 or higher as it exposes more of the page&#8217;s content and provides quite a few extra helper classes to aid in your testing.</em></p>
+Benissimo, quindi io che sto facendo un plugin per la versione 3.13.4 di Jira, sostituisco questo valore nelle tre properties del POM
+<pre style="padding-left:20px;">&lt;properties&gt;
+ ...
+    &lt;atlassian.product.version&gt;3.13.4&lt;/atlassian.product.version&gt;
+    &lt;atlassian.product.test-lib.version&gt;3.13.4&lt;/atlassian.product.test-lib.version&gt;
+    &lt;atlassian.product.data.version&gt;3.13.4&lt;/atlassian.product.data.version&gt;
+ &lt;/properties&gt;</pre>
+Detto, fatto.
+Mi manca solo di creare il mio primo test di integrazione, rigorosamente nel package che inizia con &#8220;it&#8221;.
+<pre> package it.com.sourcesense.jira.plugin;
+
+ import com.atlassian.jira.webtests.JIRAWebTest;
+
+ public class JiraTest extends JIRAWebTest {
+
+    public JiraTest(String name) {
+      super(name);
+    }
+
+    public void setUp() {
+      super.setUp();
+      restoreDataWithLicense("JiraDataForTest.xml", ENTERPRISE_KEY);
+   }
+
+   public void testVerySimple() throws Exception {
+      assertTextPresent("This JIRA site is for demonstration purposes only");
+   }
+ }</pre>
+E copiare il dump esportato da Jira per avere qualche dato di test (JiraDataForTest.xml) nel folder src/test/xml/ del progetto del plugin.
+
+A questo punto non mi resta che lanciare il seguente comando nella home della progetto
+<pre style="padding-left:20px;">mvn integration-test</pre>
+e aspettare con pazienza che maven scarichi quel Terabyte di jar di cui dichiara di aver bisogno.
+
+Primo problema: la console di mvn mi dice
+<pre> [INFO] [jar:jar]
+ [INFO] Building jar:
+        /private/tmp/HelloWorldPlugin/target/MyWonderfulPluginToSaveTheWorld-1.0-SNAPSHOT.jar
+ [INFO] [antrun:run {execution: generate-integration-test-config}]
+ [INFO] Executing tasks
+ [touch] Creating
+  /private/tmp/MyWonderfulPluginToSaveTheWorld/target/test-classes/localtest.properties
+ [propertyfile] Updating property file:
+  /private/tmp/MyWonderfulPluginToSaveTheWorld/target/test-classes/localtest.properties
+ [INFO] Executed tasks
+ [INFO] [antrun:run {execution: pre-integration-test-user-ant-tasks}]
+ [INFO] Executing tasks
+ [INFO] Executed tasks
+ [INFO] [atlassian-test-harness:start-fisheye {execution: start-fisheye}]
+ [INFO] Skipping fisheye; startService is set to false
+ [INFO] [atlassian-test-harness:start-confluence {execution: start-confluence}]
+ [INFO] Skipping confluence; startService is set to false
+ [INFO] [atlassian-test-harness:start-jira {execution: start-jira}]
+ [INFO] Output log is set to /private/tmp/MyWonderfulPluginToSaveTheWorld/target/jira/output.log</pre>
+E si blocca lì.
+Vado a vedere il log segnalato nell&#8217;ultima riga della console, e scopro una pletora di eccezioni:
+<pre>2009-07-07 16:11:19,568 main ERROR
+[com.atlassian.license.LicenseManager] Exception getting license: java.lang.RuntimeException: contactLicense was null
+ at org.picocontainer.defaults.DecoratingComponentAdapter.getComponentInstance(DecoratingComponentAdapter.java:42)
+ at org.picocontainer.defaults.SynchronizedComponentAdapter.getComponentInstance(SynchronizedComponentAdapter.java:35)
+ ...</pre>
+Indago, guardo su Google, niente.
+Provo allora a sostituire 3.13.4 con 3.13.2 nelle tre properties del POM
+<pre style="padding-left:20px;">&lt;properties&gt;
+    ...
+   &lt;atlassian.product.version&gt;3.13.2&lt;/atlassian.product.version&gt;
+   &lt;atlassian.product.test-lib.version&gt;3.13.2&lt;/atlassian.product.test-lib.version&gt;
+   &lt;atlassian.product.data.version&gt;3.13.2&lt;/atlassian.product.data.version&gt;
+&lt;/properties&gt;</pre>
+E rilancio &#8220;mvn integration-test&#8221;.
+Stavolta l&#8217;errore è più chiaro: fallisce il ripristino del dump JiraDataForTest.xml nell&#8217;istanza di Jira 3.13.2 che viene avviata da maven, perchè la versione del dump è stata fatta con la 3.13.4, una versione successiva alla 3.13.2, e quindi Jira si rifiuta da caricarla. Eccheccavolo.
+
+Vi risparmio tutte le combinazioni di numeri di versione che ho provato a mettere nel POM, senza successo, e vado dritto verso la soluzione.
+Ecco il pom.xml che funziona
+<pre style="padding-left:20px;">&lt;properties&gt;
+ ...
+ &lt;atlassian.product.version&gt;3.13.2&lt;/atlassian.product.version&gt;
+ &lt;atlassian.product.test-lib.version&gt;3.13.4&lt;/atlassian.product.test-lib.version&gt;
+ &lt;atlassian.product.data.version&gt;3.13.2&lt;/atlassian.product.data.version&gt;
+ &lt;/properties&gt;</pre>
+L&#8217;altra cosa da fare è modificare i dump di Jira che vorrete usare per i vostri test, in modo da far credere a Jira che sta importando una versione compatibile del dump.
+Per fare questo dovete:
+
+1. Aprire il dump xml di Jira che usate per i test (nel nostro caso JiraDataForTest.xml)
+
+2. Cercare l&#8217;occorrenza di questa property
+<pre style="padding-left:20px;">&lt;OSPropertyEntry id="12345"
+   entityName="jira.properties"
+   entityId="1"
+   propertyKey="jira.version.patched"
+   type="5"/&gt;</pre>
+<p style="padding-left:20px;">Per essere sicuri basta che cerchiate la parola &#8220;jira.version.patched&#8221;</p>
+3. Prendere nota dell&#8217;id di questa propery (es 12345) e cercare l&#8217;occorrenza di una OSPropertyString con lo stesso id
+<pre style="padding-left:20px;">&lt;OSPropertyString id="12345" value="354"/&gt;</pre>
+<p style="padding-left:20px;">Ecco, quel valore (354) rappresenta la build version di Jira, che per la 3.13.4 è proprio 354.</p>
+4. Sostituire il valore 354 con 335, che è la build versione di Jira 3.13.2 e salvare l&#8217;xml
+
+5. Rilanciare il test.
+
+Tutto dovrebbe filare liscio ora&#8230;
+<pre> $ mvn integration-test
+ ...
+ ...
+ [INFO] [jar:jar]
+ [INFO] Building jar:
+    /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/
+    target/MyWonderfulPluginToSaveTheWorld-1.0-SNAPSHOT.jar
+ [INFO] [antrun:run {execution: generate-integration-test-config}]
+ [INFO] Executing tasks
+ [propertyfile] Updating property file:
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/
+   target/test-classes/localtest.properties
+ [INFO] Executed tasks
+ [INFO] [antrun:run {execution: pre-integration-test-user-ant-tasks}]
+ [INFO] Executing tasks
+ [INFO] Executed tasks
+ [INFO] [atlassian-test-harness:start-fisheye {execution: start-fisheye}]
+ [INFO] Skipping fisheye; startService is set to false
+ [INFO] [atlassian-test-harness:start-confluence {execution: start-confluence}]
+ [INFO] Skipping confluence; startService is set to false
+ [INFO] [atlassian-test-harness:start-jira {execution: start-jira}]
+ [INFO] Output log is set to
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/target/jira/output.log
+ [INFO] Finished with jira goal
+ [INFO] [atlassian-test-harness:start-bamboo {execution: start-bamboo}]
+ [INFO] Skipping bamboo; startService is set to false
+ [INFO] [surefire:test {execution: acceptance_tests}]
+ [INFO] Surefire report directory:
+   /Users/pietrodibello/Documents/workspace/MyWonderfulProjectToSaveTheWorld/MyWonderfulPluginToSaveTheWorld/target/surefire-reports
+
+ -------------------------------------------------------
+ T E S T S
+ -------------------------------------------------------
+ Running it.com.sourcesense.jira.plugin.JiraTest
+ .
+ . Started it.com.sourcesense.jira.plugin.JiraTest.test. Wed Jul 08 14:30:44 CEST 2009
+ going to page secure/admin/XmlRestore!default.jspa
+ Asserting text present: Your project has been successfully imported
+ Asserting text present: This JIRA site is for demonstration purposes only
+ .
+ . Finished it.com.sourcesense.jira.plugin.JiraTest.test. Wed Jul 08 14:30:54 CEST 2009
+ . The test ran in 10.542 seconds
+ . The test suite has been running for 10.536 seconds
+ . Max Mem : 66650112 Total Mem : 2727936 Free Mem : 268968
+ . ______________________________
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.045 sec
+
+ Results :
+
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+ [INFO] ------------------------------------------------------------------------
+ [INFO] BUILD SUCCESSFUL
+ [INFO] ------------------------------------------------------------------------
+ [INFO] Total time: 44 seconds
+ [INFO] Finished at: Wed Jul 08 14:30:55 CEST 2009
+ [INFO] Final Memory: 32M/254M
+ [INFO] ------------------------------------------------------------------------</pre>
+Evviva, barra verde!!
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-07-08T00:00:00+02:00" pubdate data-updated="true">Jul 8<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2009/07/08/come-fare-integration-test-su-un-plugin-per-jira-3-13-4/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2009/07/08/come-fare-integration-test-su-un-plugin-per-jira-3-13-4/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/07/06/come-generare-il-report-html-dei-test-eseguiti-con-jmeter/" title="Previous Post: Come generare il report HTML dei test eseguiti con Jmeter">&laquo; Come generare il report HTML dei test eseguiti con Jmeter</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/10/02/ruby-how-to-spot-slow-tests-in-your-test-suite/" title="Next Post: Ruby: how to spot slow tests in your test suite">Ruby: how to spot slow tests in your test suite &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

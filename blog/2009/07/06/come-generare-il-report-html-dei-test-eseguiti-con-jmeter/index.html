@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Come generare il report HTML dei test eseguiti con Jmeter - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="Problema: &#8220;Ho problemi con il report html dei test jmeter generato dalla trasformazione XSL indicata dalla documentazione di Jmeter (versione 2 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2009/07/06/come-generare-il-report-html-dei-test-eseguiti-con-jmeter/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Come Generare Il Report HTML Dei Test Eseguiti Con Jmeter</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-07-06T00:00:00+02:00" pubdate data-updated="true">Jul 6<span>th</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><strong>Problema</strong>: <em>&#8220;Ho problemi con il report html dei test jmeter generato dalla trasformazione XSL indicata dalla documentazione di Jmeter (versione 2.3.4). Infatti nel report html si hanno due comportamenti anomali:</em>
+<ul>
+	<li><em>la prima riga è sempre raddoppiata, ovvero presente due volte (e vabbè, passi)</em></li>
+	<li><em>le colonne che indicano i tempi massimi e minimi non sono valorizzate (NaN)&#8221;</em></li>
+</ul>
+<strong>Soluzione</strong>: <em>&#8220;Il problema è nella versione di Xalan inclusa di default nel JRE 1.5 e 1.6 di java. Si deve usare Xalan-J 2.4.1&#8221;</em>
+
+<strong>Descrizione più dettagliata</strong>:
+
+Tutto è nato con dei test di carico e performance che stiamo eseguendo in questo periodo.
+Jmeter, di cui usiamo la versione 2.3.4, esporta il report del test plan in formato XML (o CSV se specificato). Per convertirlo in un HTML più comodamente fruibile si deve effettuare una trasformazione XSL, e per fortuna Jmeter mette a disposizione degli stylesheet apposta per questo (si trovano nel folder /extras dell&#8217;installazione di Jmeter).
+
+Detto, fatto. Il comando che eseguo dovrebbe essere (ad esempio)
+<pre style="padding-left:30px;">java org.apache.xalan.xslt.Process
+  -IN jmeterResults.xml
+  -XSL ~/work/jakarta-jmeter-2.3.4/extras/jmeter-results-report_21.xsl
+  -OUT jmeterResults.html</pre>
+
+Purtroppo questa trasformazione non funziona, o meglio, produce un HTML incompleto (vedi sezione &#8220;Problema&#8221;).
+
+Dopo diversi tentativi, ho scoperto la soluzione, grazie ad un commento a <a href="http://jlorenzen.blogspot.com/2008/03/automated-performance-tests-using.html">questo post</a>: usando la <a href="http://mirrors.ibiblio.org/pub/mirrors/maven2/xalan/xalan/2.4.1/">versione 2.4.1 di Xalan-J</a> l&#8217;HTML prodotto è completo.
+
+Per la cronaca, per lanciare la trasformazione XSL a linea di comando specificando una propria versione di Xalan, basta fare così
+<pre style="padding-left:30px;">java
+<strong>  -cp xalan-2.4.1.jar</strong> org.apache.xalan.xslt.Process
+  -IN log.jtl
+  -XSL ../extras/jmeter-results-report_21.xsl
+  -OUT foo.html</pre>
+<span style="font-family:Georgia, 'Times New Roman', 'Bitstream Charter', Times, 0;font-size:small;"><span style="line-height:19px;white-space:normal;">
+</span></span>
+<span style="font-family:Georgia, 'Times New Roman', 'Bitstream Charter', Times, 0;line-height:19px;white-space:normal;font-size:13px;">E in ant (cosa che interessava me in particolare, perchè lanciavamo jmeter da ant)</span>
+<pre style="padding-left:30px;">&lt;xslt
+  in="${scenario.target.path}/scenario-result.xml"
+  out="${scenario.target.path}/AggregateReport.html"
+  style="${jmeter.home}/extras/jmeter-results-report_21.xsl"
+<strong>  classpath="${basedir}/../xalan-2.4.1.jar"</strong> /&gt;</pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-07-06T00:00:00+02:00" pubdate data-updated="true">Jul 6<span>th</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2009/07/06/come-generare-il-report-html-dei-test-eseguiti-con-jmeter/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2009/07/06/come-generare-il-report-html-dei-test-eseguiti-con-jmeter/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/03/23/sul-coaching/" title="Previous Post: Sul coaching...">&laquo; Sul coaching...</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/07/08/come-fare-integration-test-su-un-plugin-per-jira-3-13-4/" title="Next Post: Come fare integration test su un plugin per Jira 3.13.4">Come fare integration test su un plugin per Jira 3.13.4 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ruby: how to spot slow tests in your test suite - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="This is actually my first post in english and also my first post on Ruby/Rails stuff. Twice as hard! Anyway, we&#8217;re working on a Rails project, &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2009/10/02/ruby-how-to-spot-slow-tests-in-your-test-suite/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ruby: How to Spot Slow Tests in Your Test Suite</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-10-02T00:00:00+02:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2009</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">This is actually my first post in english and also my first post on Ruby/Rails stuff. Twice as hard!
+
+Anyway, we&#8217;re working on a Rails project, and we&#8217;re experiencing the classical debate in all Rails project (at least the ones with tests!): why our test suite is so damn slow?!
+Ok, we know that ActiveRecord is one of the key components in Rails and is at the root of its philosophy of web development. And along with ActiveRecord comes the strong tight between the model and the database. So each test, even the unit tests, will touch the database (ok, technically speaking they cannot be defined unit-tests, I know. Sorry Michael Feathers for <a title="What is a unit test" href="http://www.artima.com/weblogs/viewpost.jsp?thread=126923">betraying your definition</a>).
+The very first consequence of this approach is that as your test suite grows with your project, it will become slower and slower.
+
+Let&#8217;s take our current project. This is our actual test suite composition:
+<ul>
+	<li> Unit: 317 tests, 803 assertions</li>
+	<li> Functional: 245 tests, 686 assertions</li>
+	<li> Integration: 50 tests, 218 assertions</li>
+</ul>
+So we have<strong> 612 test methods</strong>, for a resulting number of <strong>1707 assertions</strong>.
+As a side note, our code-to-test ratio is 1:2.3, that is, for each line of production code we have 2.3 lines of tests.
+The suite takes about <strong>115 seconds to execute</strong> (on my MacBook Pro Core 2 Duo).
+
+So, what can we do to speed up our tests and have a more &#8220;feedback-friendly&#8221; test suite?
+The first step toward the solution of this issue is to have some metrics to reflect on, and so I developed this little ruby module to collect test duration times.
+This is how you can use it too:
+
+First, create a file called <strong>&#8220;test_time_tracking.rb&#8221;</strong> in the test folder of your Rails project. This should be its content:
+<pre style='color:#000020;background:#f6f8ff;'><span style='color:#200080;font-weight:bold;'>module</span> TestTimeTracking
+    <span style='color:#200080;font-weight:bold;'>class</span> ActiveSupport::TestCase
+      <span style='color:#200080;font-weight:bold;'>def</span> self<span style='color:#308080;'>.</span>should_track_timing?
+        <span style='color:#200080;font-weight:bold;'>not</span><span style='color:#308080;'>(</span>ENV<span style='color:#308080;'>[</span><span style='color:#1060b6;'>"tracking"</span><span style='color:#308080;'>]</span><span style='color:#308080;'>.</span><span style='color:#200080;font-weight:bold;'>nil</span>?<span style='color:#308080;'>)</span>
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+      setup :mark_test_start_time <span style='color:#200080;font-weight:bold;'>if</span> should_track_timing?
+      teardown :record_test_duration <span style='color:#200080;font-weight:bold;'>if</span> should_track_timing?
+
+      <span style='color:#200080;font-weight:bold;'>def</span> mark_test_start_time
+        @start_time <span style='color:#308080;'>=</span> Time<span style='color:#308080;'>.</span>now
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+      <span style='color:#200080;font-weight:bold;'>def</span> record_test_duration
+        File<span style='color:#308080;'>.</span><span style='color:#400000;'>open</span><span style='color:#308080;'>(</span><span style='color:#1060b6;'>"/tmp/test_metrics.csv"</span>, <span style='color:#1060b6;'>"a"</span><span style='color:#308080;'>)</span> <span style='color:#200080;font-weight:bold;'>do</span> |file|
+          file<span style='color:#308080;'>.</span><span style='color:#400000;'>puts</span> <span style='color:#1060b6;'>"#{name().gsub(/,/, '_')},#{Time.now - @start_time}"</span>
+        <span style='color:#200080;font-weight:bold;'>end</span>
+      <span style='color:#200080;font-weight:bold;'>end</span>
+
+    <span style='color:#200080;font-weight:bold;'>end</span>
+<span style='color:#200080;font-weight:bold;'>end</span>
+</pre>
+Then, edit your <strong>&#8220;test_helper.rb&#8221;</strong> (again, under the test folder), to require and include the previous module.
+E.g.
+
+*test_helper.rb*
+<pre style='color:#000020;background:#f6f8ff;'>ENV<span style='color:#308080;'>[</span><span style='color:#1060b6;'>"RAILS_ENV"</span><span style='color:#308080;'>]</span> <span style='color:#308080;'>=</span> <span style='color:#1060b6;'>"test"</span>
+  <span style='color:#400000;'>require</span> File<span style='color:#308080;'>.</span>expand_path<span style='color:#308080;'>(</span>File<span style='color:#308080;'>.</span>dirname<span style='color:#308080;'>(</span>__FILE__<span style='color:#308080;'>)</span> <span style='color:#308080;'>+</span> <span style='color:#1060b6;'>"/../config/environment"</span><span style='color:#308080;'>)</span>
+  <span style='color:#400000;'>require</span> <span style='color:#1060b6;'>"test_time_tracking"</span>
+
+  <span style='color:#200080;font-weight:bold;'>class</span> ActiveSupport::TestCase
+    include TestTimeTracking
+    <span style='color:#308080;'>.</span><span style='color:#308080;'>.</span><span style='color:#308080;'>.</span>
+</pre>
+then, all you have to do is executing your rake task with the &#8220;tracking&#8221; option set, e.g.
+<code>tracking=on rake</code>
+
+At the end of the test suite execution you&#8217;ll find a CSV file (test_metrics.csv) in your /tmp folder.
+This file contains a line for each test method executed, along with its duration in seconds.
+I use to upload this file in google docs, and then apply a formula to sort out the methods from the slowest to the fastest.
+A good formula is the following:
+<code>=Sort(A2:B612, B2:B612, FALSE)</code>
+
+The main limitation in the current implementation of this module is that every time the suite is executed with rake, the new time metrics collected are appended at the end of the previous file (if it exists), so each time you should remember to move the file to a different location. I&#8217;m working on this issue, so I&#8217;m expecting to find a better solution. Stay tuned!
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2009-10-02T00:00:00+02:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2009</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2009/10/02/ruby-how-to-spot-slow-tests-in-your-test-suite/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2009/10/02/ruby-how-to-spot-slow-tests-in-your-test-suite/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2009/07/08/come-fare-integration-test-su-un-plugin-per-jira-3-13-4/" title="Previous Post: Come fare integration test su un plugin per Jira 3.13.4">&laquo; Come fare integration test su un plugin per Jira 3.13.4</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2009/11/04/think-different-about-mock-objects/" title="Next Post: Think different about mock objects!">Think different about mock objects! &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My Octopress Blog</title>
-  <meta name="author" content="Your Name">
+  <title>XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts ">
+  <meta name="description" content="How handy is the attr_reader method? Very handy indeed. Never asked yourself how it may be implemented? Just do it! This is my take: [sourcecode &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -24,20 +24,32 @@
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My Octopress Blog</a></h1>
+  <h1><a href="/">XPlayer</a></h1>
   
-    <h2>A blogging framework for hackers.</h2>
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
   
 </hgroup>
 
@@ -65,7 +77,786 @@
       <div class="blog-index">
   
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby Reimplementing It: Attr_reader</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-12T00:00:00+01:00" pubdate data-updated="true">Feb 12<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">How handy is the attr_reader method? Very handy indeed.
+
+Never asked yourself how it may be implemented? Just do it!
+
+This is my take:
+
+[sourcecode language=&#8221;ruby&#8221;]
+module Kernel
+  def attribute_reader(attribute)
+    define_method(attribute) do
+      instance_variable_get(&quot;@#{attribute}&quot;)
+    end
+  end
+end
+
+
+class MyClass
+  attribute_reader :my_attribute
+end
+
+m = MyClass.new
+m.instance_variable_set(&quot;@my_attribute&quot;, 42)
+
+puts m.my_attribute # =&gt; 42
+[/sourcecode]
+
+What&#8217;s yours?
+
+Have fun!
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/02/12/attr_writer/">Learning Ruby Reimplementing It: Attr_writer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-02-12T00:00:00+01:00" pubdate data-updated="true">Feb 12<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">This is how attr_writer may be (re)implemented:
+
+[sourcecode language=&#8221;ruby&#8221;]
+module Kernel
+  def attribute_writer(attribute)
+    define_method(&quot;#{attribute}=&quot;.to_sym) do |value|
+      instance_variable_set(&quot;@#{attribute}&quot;, value)
+    end
+  end
+end
+
+class MyClass
+  attribute_writer :my_attribute
+end
+
+m = MyClass.new
+m.my_attribute = 23
+
+puts m.instance_variable_get &quot;@my_attribute&quot; # =&gt; 23
+[/sourcecode]
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails Project File for Sublime Text 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-22T00:00:00+01:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">The simplest thing that you can do to open up the <a href="http://www.sublimetext.com/" target="_blank">Sublime Text 2</a> editor on your Rails project is to just type in
+<pre>$ subl .</pre>
+on the Rails root directory¹.
+
+A slightly better solution is to create a .sublime-project file in your project root directory, so that you may launch the editor with something like
+<pre>$ subl --project my_rails_project.sublime-project</pre>
+A question then arises, &#8220;How do I exclude useless directories as tmp or log from the project file?&#8221;
+
+Answer: just edit the sublime-project file this way:
+<pre>{
+ "folders":
+ [
+   {
+     "path": ".",
+     "folder_exclude_patterns": ["tmp", "log"],
+     "file_exclude_patterns": [".tmtags"]
+   }
+ ]
+}</pre>
+(and of course you should adapt it to your actual preferences on what to exclude from your project).
+
+Note that you can also specify a <strong>&#8220;file_exclude_patterns&#8221;</strong> property to filter out some files (in my case I wanted to exclude the ctag index file).
+<ol>
+	<li>to install the command line tool, just follow the docs <a href="http://www.sublimetext.com/docs/2/osx_command_line.html">here</a>.</li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A Review of &#8220;Great Bash&#8221; Video by Carl Albing (O&#8217;Reilly Media)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-08-27T00:00:00+02:00" pubdate data-updated="true">Aug 27<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Shell programming is a topic that every professional programmer should care about, and keep improving on, for several reasons.
+Here are the first two I can think about:
+<ol>
+	<li>Because is essential in order to promote the automation of many manual processes (and automation is damn important!).</li>
+	<li>Because I like to be a programmer as much as a <a title="what is a devop?" href="http://en.wikipedia.org/wiki/DevOps" target="_blank">devop</a>, and I want to be able to deploy what I develop, and take care of all the operational and system stuff related to the system I contribute to build.</li>
+</ol>
+Me myself made the mistake of underestimate the relevance of this topic for way too time in the past: don&#8217;t make my same mistake :-)
+
+<a title="Carl Albing's &quot;Great Bash&quot; by O'Reilly Media" href="http://oreilly.com/catalog/0636920013334" target="_blank">Carl Albing&#8217;s &#8220;Great Bash&#8221; by O&#8217;Reilly Media</a> is a collection of several short video lessons on the basics of the shell programming.
+
+I watch the &#8220;Great Bash&#8221; lessons hoping to learn more about shell programming, but unfortunately Carl Albing&#8217;s video lessons are too introductory (IMHO).
+
+It was nevertheless great to recap many things I learned here and there, and so my time watching it was not wasted at all, but I would recommend this video only to shell programmer beginners.
+
+There are also some (really) minor defects in the technical way the video is recorded: the audio quality may be improved and sometimes the speaker take some long inexplicable pauses. But, that said, the overall quality is really good.
+
+In the end I recommend to watch this video if you are a shell programmer beginner and you want to start understanding more about this topic.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically Add Data Accessor Methods on &#8220;Static&#8221; Rails Data Model</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-03-12T00:00:00+01:00" pubdate data-updated="true">Mar 12<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">An useful metaprogramming spell I recently played with is the <code>Module#define_method()</code>, which dynamically adds an instance method to the class on which is called.
+
+&nbsp;
+
+I found it particularly useful to add data accessor methods on &#8220;static&#8221; Rails data model: suppose I&#8217;m working an e-commerce Rails webapp, and I have a <code>Country</code> model which maps the countries suitable for shipping, or a <code>PaymentType</code> model which represents all the possible payment types.
+
+For these kind of models (and tables), which are typically static (they don&#8217;t change often), you often have to access specific values, say <code>Country.italy</code> or <code>PaymentType.credit_card</code>.
+
+In these cases, defining dynamically an accessor method may be useful and more clear than always perform a <code>find_by_name("my value")</code>.
+
+So, for example, I open up my country.rb model class and add these lines
+
+[sourcecode language=&#8221;ruby&#8221;]
+class &lt;&lt; self
+  Country.all.each do |each_country|
+    define_method(each_country.name.downcase.gsub(&#8216;.&#8217;, &#8221;).gsub(&#8217; &#8216;, &#8216;_&#8217;)) do
+      Country.find_by_iso_code(each_country.iso_code)
+    end
+  end
+end
+[/sourcecode]
+And then opening the Rails console I will be able to type
+<pre>1.8.7@epistore &gt; Country.sri_lanka
+# {
+                :id =&gt; 59,
+              :zone =&gt; "U9",
+           :enabled =&gt; true,
+        :created_at =&gt; Tue, 20 Apr 2010 17:01:45 CEST +02:00,
+        :updated_at =&gt; Tue, 20 Apr 2010 17:01:45 CEST +02:00,
+          :iso_code =&gt; "LK",
+    :country_set_id =&gt; nil
+}</pre>
+Just a note: as I said, <code>Module#define_method()</code> will add an <strong>instance method on the class</strong>. To add a <strong>class method</strong>, which is what I want, we have to use a different approach, using the <code>class &lt;&lt; self</code> syntax to add a singleton method in the receiver.
+
+I may also add a query method on each <code>Country</code> instance to check that country against another country (for example, I may ask <code>my_country.italy?</code>)
+<pre>  Country.all.each do |each_country|
+    define_method(each_country.name.downcase.gsub('.', '').gsub(' ', '_').concat('?')) do
+      has_iso_code? each_country.iso_code
+    end
+  end</pre>
+And then, after issuing a <code>reload!</code> command in the Rails console, I may type:
+<pre>1.8.7@epistore &gt; Country.usa.usa?
+true
+1.8.7@epistore &gt; Country.usa.italy?
+false
+1.8.7@epistore &gt; Country.usa.south_korea?
+false
+1.8.7@epistore &gt; Country.south_korea.south_korea?
+true</pre>
+Depending on the kind of Rails app you have, these may be a useful tip.
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/09/16/assert_select_rjs-reloaded/">Assert_select_rjs Reloaded!</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-09-16T00:00:00+02:00" pubdate data-updated="true">Sep 16<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div id="_mcePaste">If you ever dared to unit-test a Rails RJS action, for example something like this:</div>
+<blockquote>
+<pre>def my_ajax_action
+   ...
+   render(:update) do |page|
+     page.replace_html 'shoppinglist', :partial =&gt; 'cart'
+     page.replace_html 'items', :partial =&gt; 'layouts/items', :locals =&gt; { :cart =&gt; @cart }
+   end
+end</pre>
+</blockquote>
+<div id="_mcePaste">you may already know and use the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> testing helper, which basically will verify the structure of your RJS response.</div>
+This testing method may really help you shortening the TDD feedback loop in an AJAX-based Rails webapp, and then you&#8217;ll may even be confident enough and save one or two brittle Selenium tests.
+<div>The only problem with <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> is that is (IMHO) poorly documented and rarely googled about.</div>
+<div id="_mcePaste">So, this is my turn to give back what we discovered.</div>
+If you have a Rails webapp using jQuery as javascript framework, you may have a hard time using <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> correctly, and this is why:
+<div id="_mcePaste">for jQuery, this is the correct way to use <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>:</div>
+<blockquote>
+<pre>assert_select_rjs :replace_html, '#shoppinglist'</pre>
+</blockquote>
+<div>it&#8217;s important the &#8216;#&#8217; prefix here to refer to DOM element IDs, since the notation without &#8216;#&#8217; will work only if your app uses Prototype.</div>
+<div id="_mcePaste">Another nice thing to know is the way to make assertion on the selection matched by the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>.</div>
+<div id="_mcePaste">For example, this code</div>
+<blockquote>
+<pre>assert_select_rjs :replace_html, '#shoppinglist' do
+    assert_select '#shipping_cost_description', /Shipping costs for France/
+    assert_select '#shipping_cost_value', /&amp;euro; 12,30/
+end</pre>
+</blockquote>
+<div>will verify that the section replaced inside the &#8216;shoppinglist&#8217; element will match the two followings assetions.</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/02/19/my-first-test-using-webdriver-aka-selenium-2-0/">My First Test Using Webdriver (Aka Selenium 2.0)!</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-19T00:00:00+01:00" pubdate data-updated="true">Feb 19<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div>
+<div>
+
+<a rel="nofollow" href="http://www.the-arm.com/2010/02/suffering-of-selenese-flu-try-webdriver/">As many say</a>, a good solution to <em>selenese flu</em> is <strong>Webdriver</strong> (see more at <a rel="nofollow" href="http://code.google.com/p/selenium">http://code.google.com/p/selenium</a>).
+
+Webdriver has been accepted by the Selenium guys as the new approach  to web application testing, opposed to the classical &#8220;selenium 1.0&#8221;  approach, based on a javascript driver, which suffers from way too many  issues.
+Unfortunately, Selenium 2.0, which plan to fully support Webdriver, is  still on an alpha release, and actually is very difficult to find  ruby-based web testing tools supporting this alpha version of selenium  2.0.
+One of those tools is actually Watir (though Webrat too is planning to  support Selenium 2.0 sooner or later), and more precisely <a rel="nofollow" href="http://github.com/jarib/watir-webdriver">this  project</a> is quite stable to allow a first test drive.
+
+So this is what I did:
+
+First: installed required gems
+<div>
+<div>
+<pre>  sudo gem install selenium-webdriver
+  sudo gem install watir-webdriver --pre
+</pre>
+</div>
+</div>
+Second: configure my Rails testing configuration to use watir
+<div>
+<div><strong>config/environments/test.rb</strong></div>
+<div>
+<pre>  ...
+  config.gem "watir-webdriver"
+  ...
+</pre>
+</div>
+</div>
+<div>
+<div><strong>test/test_helper.rb</strong></div>
+<div>
+<pre>  require 'test_help'
+  ...
+  require 'watir-webdriver'
+  ...
+</pre>
+</div>
+</div>
+Third: write a test
+<div>
+<div><strong>test/integration/paypal_integration_test.rb</strong></div>
+<div>
+<pre>require 'test_helper'
+
+class PaypalIntegrationTest &lt; ActionController::IntegrationTest
+  include LocaleHelper
+  self.use_transactional_fixtures = false
+
+  def setup
+    ... some setup stuff here ...   
+    @browser = Watir::Browser.new(:firefox)
+  end
+
+  def teardown
+    @browser.close
+  end
+
+  test "something interesting" do
+    @browser.goto "https://developer.paypal.com/"
+    @browser.text_field(:name, "login_email").set "my_test_account@sourcesense.com"
+    @browser.text_field(:name, "login_password").set "mysecret"
+    @browser.button(:name, "submit").click
+
+    @browser.goto "https://localhost"
+
+    @browser.link(:id, 'loginlink').click
+    @browser.text_field(:name, "email").set @user.email
+    @browser.text_field(:name, "password").set @user.password
+    @browser.button(:text, "Login").click
+
+    # add_a_product_to_cart
+    product = Factory(:product, :code =&gt; "a code", :categories =&gt; [@juve_store])
+    Factory(:product_variant, :code =&gt; "03", :availability =&gt; 99, :product =&gt; product)
+    @browser.goto "https://localhost/frontend/products/show/#{product.id}"
+    @browser.button(:id, "add_to_cart").click
+
+    @browser.link(:text, "Checkout").click
+    @browser.link(:id, "gotobuy").click
+
+    # choose "Paypal"
+    @browser.radios.last.set
+
+    @browser.link(:id, "gotobuy").click
+
+    sleep 5
+    assert @browser.text.include?("Payment for order #{last_order_number()}")
+
+    @browser.text_field(:name, "login_email").set "my_test_buyer@sourcesense.com"
+    @browser.text_field(:name, "login_password").set "yetanothersecrethere"
+    @browser.button(:text, "Accedi").click
+    @browser.button(:text, "Paga ora").click
+
+    sleep 5
+    assert @browser.text.include?("Il pagamento è stato inviato")
+
+    @browser.button(:id, "merchantReturn").click
+    assert_contain_waiting("Your purchase")
+    assert_contain_waiting(last_order_number())
+
+  end
+
+private
+
+  def last_order_number
+    Order.last ? Order.last.number : ""
+  end
+
+end
+</pre>
+</div>
+</div>
+Some comments here:
+<ul>
+	<li>This is a spike, so please don&#8217;t say this test is too long and not  well refactored <img src="https://dev.sourcesense.com/confluence/images/icons/emoticons/smile.gif" border="0" alt="" width="20" height="20" align="absmiddle" /></li>
+	<li>I had to put two sleep calls in two places (I gotta say that this  specific test, involving paypal sandbox, is really slow due to the  slowness in the paypal response time).</li>
+	<li>Anyway, this alpha version of webdriver is still lacking: I cannot  say wheather this is a problem I&#8217;ll have even with future (possibly more  stable) version of Webdriver.</li>
+</ul>
+Some references:
+<ul>
+	<li><a rel="nofollow" href="http://zeljkofilipin.com/2010/01/12/watir-on-webdriver/">http://zeljkofilipin.com/2010/01/12/watir-on-webdriver/</a></li>
+	<li><a rel="nofollow" href="http://developer-in-test.blogspot.com/2010/01/chromewatir-watir-webdriver-update.html">http://developer-in-test.blogspot.com/2010/01/chromewatir-watir-webdriver-update.html</a></li>
+	<li><a rel="nofollow" href="http://jarib.github.com/watir-webdriver/doc/index.html">http://jarib.github.com/watir-webdriver/doc/index.html</a></li>
+</ul>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/02/08/a-still-brief-experience-on-using-selenium-to-test-a-rails-ajax-app/">A (Still Brief) Experience on Using Selenium to Test a Rails + Ajax App</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-08T00:00:00+01:00" pubdate data-updated="true">Feb 8<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><div>
+<div>
+
+This is a note to make a point on our (mine and my team&#8217;s) current use of Selenium  to test the ajax behaviour in the Rails webapp we&#8217;re currently developing. Ajax replacing of part of the page is growing, and with it we have  to face the classical question: <em>&#8220;how do we test (I mean  automatically :-) the  ajax/javascript behaviours in our webapp?&#8221;</em>.
+
+This is how we are trying to manage this issue now, after some days  of spiking on Selenium, Watir and BlueRidge (I hope to write more on Watir and BlueRidge in some future post, because these two tools are worth speaking).
+
+Actually we are giving a try to the combination of Webrat + Selenium,  since we already have a big test suite of integration test using Webrat,  and have a good knowledge of the Webrat API.
+
+We added the selenium-client gem to be able to drive Selenium through  the Webrat API.
+This is extracted from our test environment configuration file:
+<div>
+<div><strong>test.rb</strong></div>
+<div>
+<pre>...
+config.gem 'selenium-client', :lib =&gt; 'selenium/client'
+config.gem "webrat", :version =&gt; '&gt;= 0.6.0'
+...</pre>
+</div>
+</div>
+Then, we defined a class from which all the selenium test cases will  inherit.
+This class basically is used to
+<ul>
+	<li>disable the transactional fixtures in Rails, to allow the browser  process where Selenium runs to access the data prepared in the tests</li>
+	<li>configure Webrat with the &#8220;selenium&#8221; mode</li>
+	<li>be the place to collect helper methods as &#8220;login&#8221; or &#8220;logout&#8221;, used  in many tests.</li>
+</ul>
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>class SeleniumIntegrationTest &lt; ActionController::IntegrationTest
+  self.use_transactional_fixtures = false
+
+  setup :switch_webrat_to_selenium
+  def switch_webrat_to_selenium
+    Webrat.configure do |config|
+      config.mode = :selenium
+      config.application_environment = :test
+    end
+
+    selenium.set_speed(100)       # default is 0 ms
+    selenium.set_timeout(10000)   # default is 30000 ms
+  end
+
+  teardown :delete_cookies
+  def delete_cookies
+    selenium.delete_all_visible_cookies
+  end
+
+protected
+ ...
+ [other helper methods here, like login, logout, and so on...]
+
+ ...</pre>
+</div>
+</div>
+We also added a rake task to be able to launch all the selenium tests
+<div>
+<div><strong>test.rake</strong></div>
+<div>
+<pre>namespace :test do
+  ...
+  ...
+
+  desc "Run Selenium Test"
+  Rake::TestTask.new(:selenium) do |t|
+    t.libs &lt;&lt; "test"
+    t.test_files = FileList['test/selenium/*test.rb']
+    t.verbose = true
+  end
+end</pre>
+</div>
+</div>
+One thing we learned through several repeated mistakes is that the  Webrat API is different when called in the &#8220;selenium&#8221; mode then the one  we were used to when using Webrat in the classical &#8220;rails&#8221; mode.
+For example, the &#8220;assert_have_selector&#8221; method for selenium only takes  one argument, that is the CSS selector, while in the classical webrat  mode, the same method takes another parameter to specify the expected  content to match with (see this rdoc: <a rel="nofollow" href="http://gitrdoc.com/brynary/webrat/tree/master">http://gitrdoc.com/brynary/webrat/tree/master</a>).  So we had to define helper methods based on &#8220;assert_have_xpath&#8221; method  using xpath to express the same intent of a method like  assert_have_selector(css_selector, expected_content)
+
+Here is our helper method
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>  ...
+  def assert_has_id id, text_content
+    assert_have_xpath "//*[@id='#{id}'][1][text()='#{text_content}']"
+  end
+  ...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/">Fixing SeleniumRC to Work With Firefox 3.6</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-04T00:00:00+01:00" pubdate data-updated="true">Feb 4<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">The brand new release of Firefox 3.6 brings, together with some improvements in the browser, also some headaches for all selenium users: actually the latest selenium RC jar (selenium-server.jar) won&#8217;t work with Firefox 3.6.
+
+The problem is related to the addons that Selenium will pretend to have in the Firefox instance fired up when Selenium RC server starts. As a matter of fact, those two addons are not declared to be compatible with 3.6.
+
+The simple fix is then to edit the addons&#8217; install.rdf files in the selenium-server.jar to manually set the compatibility to 3.6.
+
+Alternatively, you can download <a href="http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar">this patched jar</a> from <a href="http://github.com/saucelabs/saucelenium/">this</a> repository, rename it to selenium-server.jar and replace the previous jar with this.
+
+The actual steps to fix my webrat gem (I use Selenium through Webrat) were
+<ol>
+	<li>download the above mentioned file (http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar)</li>
+	<li>rename it to selenium-server.jar</li>
+	<li>replace the previous file in the vendor folder of your webrat gem (mine was /usr/local/lib/ruby/gems/1.8/gems/webrat-0.7.0/vendor/selenium-server.jar)</li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/01/18/one-and-a-half-useful-thing-to-know-when-using-deeptest-gem-with-mysql/">One (and a Half) Useful Thing to Know When Using DeepTest Gem With MySQL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-01-18T00:00:00+01:00" pubdate data-updated="true">Jan 18<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><a href="http://github.com/qxjit/deep-test">DeepTest</a> currently won&#8217;t work if you&#8217;ve configured MySQL with no password (in other words, if you are able to connect to mysql with a simple &#8220;mysql -u root&#8221;).
+To fix this, you have to patch DeepTest (I know, asap I&#8217;ll go through the whole process to propose the patch to the original project leader).
+Actually, you have to comment out a line, in the <em>DeepTest:Database:MysqlSetupListener#grant_privileges </em>method:
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+<span style="color:#400000;font-weight:bold;">def</span> grant_privileges<span style="color:#806030;">(</span>connection<span style="color:#806030;">)</span>
+sql <span style="color:#806030;">=</span> %<span style="color:#806030;">{</span>grant all on <span style="color:#c34e00;">#{worker_database}.*</span>
+to %s@<span style="color:#e60000;">'localhost'</span>;<span style="color:#806030;">}</span> % <span style="color:#806030;">[</span>
+connection<span style="color:#806030;">.</span>quote<span style="color:#806030;">(</span>worker_database_config<span style="color:#806030;">[</span>:username<span style="color:#806030;">]</span><span style="color:#806030;">)</span><span style="color:#c34e00;"># ,</span>
+<span style="color:#c34e00;"># connection.quote(worker_database_config[:password])  &lt;-- mysql with no password won't work</span>
+<span style="color:#806030;">]</span>
+connection<span style="color:#806030;">.</span>execute sql
+<span style="color:#400000;font-weight:bold;">end</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+</pre>
+Another tip (the &#8220;half&#8221; in the blog post title):
+Don&#8217;t forget to edit the &#8220;pattern&#8221; option in your DeepTest rake task, to be able to grab all the testcases you want.
+In my case, I want to skip a whole folder containing selenium tests, so I have to write my Deep Test rake file this way:
+(in <em>/lib/tasks/test.rake</em>)
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#800000;font-weight:bold;">require</span> <span style="color:#e60000;">"deep_test/rake_tasks"</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+
+DeepTest::TestTask<span style="color:#806030;">.</span><span style="color:#400000;font-weight:bold;">new</span> <span style="color:#e60000;">"deep"</span> <span style="color:#400000;font-weight:bold;">do</span> |t|
+t<span style="color:#806030;">.</span>number_of_workers <span style="color:#806030;">=</span> <span style="color:#c00000;">2</span>
+t<span style="color:#806030;">.</span>pattern <span style="color:#806030;">=</span> <span style="color:#e60000;">"test/{unit,functional,integration}/**/*_test.rb"</span>
+t<span style="color:#806030;">.</span>libs &lt;&lt; <span style="color:#e60000;">"test"</span>
+t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030;">=</span> <span style="color:#e60000;">"DeepTest::Database::MysqlSetupListener"</span>
+<span style="color:#400000;font-weight:bold;">end</span>
+</pre>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -77,11 +868,92 @@
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
     
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on &#8220;static&#8221; Rails data model</a>
+      </li>
+    
   </ul>
 </section>
 
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
 
 
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
 
 
 
@@ -91,7 +963,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - Your Name -
+  Copyright &copy; 2013 - Pietro Di Bello -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
@@ -100,7 +972,24 @@
 
 
 
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
 
 
 

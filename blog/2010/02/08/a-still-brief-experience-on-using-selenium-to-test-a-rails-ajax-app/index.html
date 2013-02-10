@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>A (still brief) experience on using Selenium to test a Rails + ajax app - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="This is a note to make a point on our (mine and my team&#8217;s) current use of Selenium to test the ajax behaviour in the Rails webapp we&#8217;re &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2010/02/08/a-still-brief-experience-on-using-selenium-to-test-a-rails-ajax-app/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">A (Still Brief) Experience on Using Selenium to Test a Rails + Ajax App</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-08T00:00:00+01:00" pubdate data-updated="true">Feb 8<span>th</span>, 2010</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><div>
+<div>
+
+This is a note to make a point on our (mine and my team&#8217;s) current use of Selenium  to test the ajax behaviour in the Rails webapp we&#8217;re currently developing. Ajax replacing of part of the page is growing, and with it we have  to face the classical question: <em>&#8220;how do we test (I mean  automatically :-) the  ajax/javascript behaviours in our webapp?&#8221;</em>.
+
+This is how we are trying to manage this issue now, after some days  of spiking on Selenium, Watir and BlueRidge (I hope to write more on Watir and BlueRidge in some future post, because these two tools are worth speaking).
+
+Actually we are giving a try to the combination of Webrat + Selenium,  since we already have a big test suite of integration test using Webrat,  and have a good knowledge of the Webrat API.
+
+We added the selenium-client gem to be able to drive Selenium through  the Webrat API.
+This is extracted from our test environment configuration file:
+<div>
+<div><strong>test.rb</strong></div>
+<div>
+<pre>...
+config.gem 'selenium-client', :lib =&gt; 'selenium/client'
+config.gem "webrat", :version =&gt; '&gt;= 0.6.0'
+...</pre>
+</div>
+</div>
+Then, we defined a class from which all the selenium test cases will  inherit.
+This class basically is used to
+<ul>
+	<li>disable the transactional fixtures in Rails, to allow the browser  process where Selenium runs to access the data prepared in the tests</li>
+	<li>configure Webrat with the &#8220;selenium&#8221; mode</li>
+	<li>be the place to collect helper methods as &#8220;login&#8221; or &#8220;logout&#8221;, used  in many tests.</li>
+</ul>
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>class SeleniumIntegrationTest &lt; ActionController::IntegrationTest
+  self.use_transactional_fixtures = false
+
+  setup :switch_webrat_to_selenium
+  def switch_webrat_to_selenium
+    Webrat.configure do |config|
+      config.mode = :selenium
+      config.application_environment = :test
+    end
+
+    selenium.set_speed(100)       # default is 0 ms
+    selenium.set_timeout(10000)   # default is 30000 ms
+  end
+
+  teardown :delete_cookies
+  def delete_cookies
+    selenium.delete_all_visible_cookies
+  end
+
+protected
+ ...
+ [other helper methods here, like login, logout, and so on...]
+
+ ...</pre>
+</div>
+</div>
+We also added a rake task to be able to launch all the selenium tests
+<div>
+<div><strong>test.rake</strong></div>
+<div>
+<pre>namespace :test do
+  ...
+  ...
+
+  desc "Run Selenium Test"
+  Rake::TestTask.new(:selenium) do |t|
+    t.libs &lt;&lt; "test"
+    t.test_files = FileList['test/selenium/*test.rb']
+    t.verbose = true
+  end
+end</pre>
+</div>
+</div>
+One thing we learned through several repeated mistakes is that the  Webrat API is different when called in the &#8220;selenium&#8221; mode then the one  we were used to when using Webrat in the classical &#8220;rails&#8221; mode.
+For example, the &#8220;assert_have_selector&#8221; method for selenium only takes  one argument, that is the CSS selector, while in the classical webrat  mode, the same method takes another parameter to specify the expected  content to match with (see this rdoc: <a rel="nofollow" href="http://gitrdoc.com/brynary/webrat/tree/master">http://gitrdoc.com/brynary/webrat/tree/master</a>).  So we had to define helper methods based on &#8220;assert_have_xpath&#8221; method  using xpath to express the same intent of a method like  assert_have_selector(css_selector, expected_content)
+
+Here is our helper method
+<div>
+<div><strong>selenium_integration_test.rb</strong></div>
+<div>
+<pre>  ...
+  def assert_has_id id, text_content
+    assert_have_xpath "//*[@id='#{id}'][1][text()='#{text_content}']"
+  end
+  ...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-08T00:00:00+01:00" pubdate data-updated="true">Feb 8<span>th</span>, 2010</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2010/02/08/a-still-brief-experience-on-using-selenium-to-test-a-rails-ajax-app/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2010/02/08/a-still-brief-experience-on-using-selenium-to-test-a-rails-ajax-app/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/" title="Previous Post: Fixing SeleniumRC to work with Firefox 3.6">&laquo; Fixing SeleniumRC to work with Firefox 3.6</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2010/02/19/my-first-test-using-webdriver-aka-selenium-2-0/" title="Next Post: My first test using webdriver (aka Selenium 2.0)!">My first test using webdriver (aka Selenium 2.0)! &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

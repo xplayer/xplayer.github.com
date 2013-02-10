@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Perche' non si dovrebbero mockizzare classi concrete - XPlayer</title>
+  <meta name="author" content="Pietro Di Bello">
+
+  
+  <meta name="description" content="Mi sono sempre chiesto perche&#8217; mai Steve Freeman e gli altri &#8216;padri&#8217; dei Mock Objects e dello stile di testing interaction-based &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xplayer.github.com/blog/2007/05/30/perche-non-si-dovrebbero-mockizzare-classi-concrete/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="XPlayer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38377452-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">XPlayer</a></h1>
+  
+    <h2>A blog on my daily efforts to be a better developer, and keep improving every day.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:xplayer.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Perche' Non Si Dovrebbero Mockizzare Classi Concrete</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-05-30T00:00:00+02:00" pubdate data-updated="true">May 30<span>th</span>, 2007</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content">Mi sono sempre chiesto perche&#8217; mai Steve Freeman e gli altri &#8216;padri&#8217; dei Mock Objects e dello stile di testing interaction-based sconsigliassero di fare mock di classi concrete, tanto che <em>jMock </em>ed <em>EasyMock </em>non supportavano questa possibilita&#8217; &#8216;nativamente&#8217;, ma si doveva installare un&#8217;estensione a parte, che usa la famosa libreria <em>CGLIB </em>(per inciso con il nuovo jMock 2 e&#8217; possibile fare mock di classi concrete, ma si deve usare la classe UnsafeHackConcreteClassImposteriser, ed il nome dice tutto di come scoraggino questa pratica).
+
+Tanto che tempo fa avevo anche commentato un <a href="http://www.mockobjects.com/2006/10/jmock-listening-to-opinionated.html#comments" title="Commento al post di Freeman">post di Freeman</a> chiedendogli perche&#8217; lui giudicasse il mock di classi concrete come una sorta di ultima possibilita&#8217; da adottare solo in casi di emergenza (es quando si affronta codice legacy particolarmente ostico e <em>chiuso</em>). E lui mi aveva risposto cosi&#8217;:
+<blockquote><font color="#000000"><em>Because then the interface is implicit, which means you can&#8217;t see it and you haven&#8217;t given it a name. Instead of using the test to expose a feature of the design, you have more to think about whenever you&#8217;re working in that area: is the method overwritten? is it in a super class? what about the state of the rest of the class I&#8217;m extending? That sort of thing.</em></font>
+
+<font color="#000000"><em>For me, the CGLIB should have a &#8220;Break Glass in Case of Emergency&#8221; written on the front. It&#8217;s useful in tight situations, but not to be recommended.</em></font></blockquote>
+Eppero&#8217; nonostante la sua risposta la cosa non mi era ancora chiara fino in fondo.
+Poi un recente post su mockobjects.com (<a href="http://www.mockobjects.com/2007/04/test-smell-mocking-concrete-classes.html"><strong>Test Smell: Mocking concrete classes</strong></a>) mi ha finalmente aiutato a capire meglio le cose.
+
+Il fatto e&#8217; che lo scopo del TDD con i Mock Objects e&#8217; quello di scoprire e far emergere relazioni tra oggetti, e dare nomi a queste relazioni. Se pero&#8217; si mantiene la relazione tra oggetti a livello di classi concrete, queste relazioni rimangono per cosi&#8217; dire piu&#8217; nascoste, implicite, e quindi diventa difficile individuarle e darle un nome.
+
+Cito direttamente il post, laddove spiega cosa non va con i mock di classi concrete:
+<blockquote><font color="#000000"><em>The problem with this approach is that it leaves the relationship between the objects implicit.
+I hope we&#8217;ve made clear by now that <strong>the intention of Test-Driven Development with Mock Objects is to discover relationships between objects</strong>.
+If I subclass, there&#8217;s nothing in the domain code to make such a relationship visible, just methods on an object. This makes it harder to see if the service that supports this relationship might be relevant elsewhere and I&#8217;ll have to do the analysis again next time I work with the class.</em></font></blockquote>
+<img src="//dictionarytip/skin/book.png" style="border:1px solid blue;z-index:90;position:absolute;left:505px;top:293px;" />
+
+Addirittura si spinge a dire che lasciando le relazioni tra oggetti a livello di classi concrete, si rischia di violare l&#8217;<a href="http://www.objectmentor.com/resources/articles/isp.pdf">Interface Segregation Principle</a>, perche&#8217; le classi dipendono da una interfaccia piu&#8217; grande di quella che usano veramente.
+
+E poi poco piu&#8217; avanti spiega che l&#8217;approccio <em>mockist</em> aiuta anche a dare nomi alle relazioni ed ai ruoli, e a ragionare piu&#8217; in termini di dominio piuttosto che di implementazione:
+<blockquote><font color="#000000"><em>There&#8217;s a more subtle but powerful reason for not mocking concrete classes.
+As part of the TDD with Mocks process, I have to think up names for the relationships I discover—in this example the <code>ScheduledDevice</code>. I find that this makes me think harder about the domain and teases out concepts that I might otherwise miss.
+Once something has a name, I can talk about it. </em></font></blockquote>
+Il tutto e&#8217; poi riassunto bene nell&#8217;altro post, <a href="http://www.mockobjects.com/2007/05/what-tests-will-tell-you.html">What the tests will tell you</a>, da leggere e rileggere, dove elenca alcuni benefici derivanti dall&#8217;approccio TDD+MockObjects
+<ul>
+	<li><em>Keeping knowledge local</em></li>
+	<li><em>If it&#8217;s explicit I can name it</em></li>
+	<li><em>More names mean more domain information</em></li>
+	<li><em>Pass behaviour rather than data</em></li>
+</ul>
+Detto questo, ammetto che sono sempre stato affascinato da questo approccio ma non ho mai trovato la forza necessaria per decidere di applicarlo un po&#8217; piu&#8217; sistematicamente, metterlo alla prova insomma.
+
+Un po&#8217; perche&#8217; nel mio team da sempre si usa l&#8217;approccio classico, e l&#8217;approccio interaction-based e&#8217; visto con qualche dubbio/sospetto, un po&#8217; perche&#8217; i nostri progetti per ora sono tutti Java 1.4 e quindi buona parte delle comodita&#8217; delle versioni piu&#8217; recenti dei framework jMock e Easymock te le perdi (soprattutto la loro maggiore <em>letteralita&#8217;</em>, cosa importante per avere dei test validi).
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2007-05-30T00:00:00+02:00" pubdate data-updated="true">May 30<span>th</span>, 2007</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2007/05/30/perche-non-si-dovrebbero-mockizzare-classi-concrete/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2007/05/30/perche-non-si-dovrebbero-mockizzare-classi-concrete/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2007/05/15/ascoltare-i-propri-test-quando-la-lunghezza-di-un-costruttore-ci-puo-insegnare-tanto/" title="Previous Post: Ascoltare i propri test: quando la lunghezza di un costruttore ci puo' insegnare tanto...">&laquo; Ascoltare i propri test: quando la lunghezza di un costruttore ci puo' insegnare tanto...</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2007/10/24/come-usare-luml/" title="Next Post: Come usare l'UML?">Come usare l'UML? &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/12/attr_writer/">Learning Ruby reimplementing it: attr_writer</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of "Great Bash" video by Carl Albing (O'Reilly Media)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on "static" Rails data model</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/xpepper">@xpepper</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'xpepper',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("pierodibello", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/pierodibello" class="twitter-follow-button" data-show-count="false">Follow @pierodibello</a>
+  
+</section>
+
+
+<section>
+  <h1>On Delicious</h1>
+  <div id="delicious"></div>
+  <script type="text/javascript" src="http://feeds.delicious.com/v2/json/pierodibello?count=3&amp;sort=date&amp;callback=renderDeliciousLinks"></script>
+  <p><a href="http://delicious.com/pierodibello">My Delicious Bookmarks &raquo;</a></p>
+</section>
+
+
+<section class="googleplus">
+  <h1>
+    <a href="https://plus.google.com/107869079010805101249?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Pietro Di Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
