@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="An advertisement for my friend and mentor Piergiuliano Bossi: his long-waited ThinkCode.TV goes live! ThinkCode.TV is a website specializes in the &hellip;">
+  <meta name="description" content="DeepTest currently won&#8217;t work if you&#8217;ve configured MySQL with no password (in other words, if you are able to connect to mysql with a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,71 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/01/18/one-and-a-half-useful-thing-to-know-when-using-deeptest-gem-with-mysql/">One (and a Half) Useful Thing to Know When Using DeepTest Gem With MySQL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-01-18T00:00:00+01:00" pubdate data-updated="true">Jan 18<span>th</span>, 2010</time>
+        
+         | <a href="/blog/2010/01/18/one-and-a-half-useful-thing-to-know-when-using-deeptest-gem-with-mysql/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><a href="http://github.com/qxjit/deep-test">DeepTest</a> currently won&#8217;t work if you&#8217;ve configured MySQL with no password (in other words, if you are able to connect to mysql with a simple &#8220;mysql -u root&#8221;).
+To fix this, you have to patch DeepTest (I know, asap I&#8217;ll go through the whole process to propose the patch to the original project leader).
+Actually, you have to comment out a line, in the <em>DeepTest:Database:MysqlSetupListener#grant_privileges </em>method:
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+<span style="color:#400000;font-weight:bold;">def</span> grant_privileges<span style="color:#806030;">(</span>connection<span style="color:#806030;">)</span>
+sql <span style="color:#806030;">=</span> %<span style="color:#806030;">{</span>grant all on <span style="color:#c34e00;">#{worker_database}.*</span>
+to %s@<span style="color:#e60000;">'localhost'</span>;<span style="color:#806030;">}</span> % <span style="color:#806030;">[</span>
+connection<span style="color:#806030;">.</span>quote<span style="color:#806030;">(</span>worker_database_config<span style="color:#806030;">[</span>:username<span style="color:#806030;">]</span><span style="color:#806030;">)</span><span style="color:#c34e00;"># ,</span>
+<span style="color:#c34e00;"># connection.quote(worker_database_config[:password])  &lt;-- mysql with no password won't work</span>
+<span style="color:#806030;">]</span>
+connection<span style="color:#806030;">.</span>execute sql
+<span style="color:#400000;font-weight:bold;">end</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+</pre>
+Another tip (the &#8220;half&#8221; in the blog post title):
+Don&#8217;t forget to edit the &#8220;pattern&#8221; option in your DeepTest rake task, to be able to grab all the testcases you want.
+In my case, I want to skip a whole folder containing selenium tests, so I have to write my Deep Test rake file this way:
+(in <em>/lib/tasks/test.rake</em>)
+<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#800000;font-weight:bold;">require</span> <span style="color:#e60000;">"deep_test/rake_tasks"</span>
+<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
+
+DeepTest::TestTask<span style="color:#806030;">.</span><span style="color:#400000;font-weight:bold;">new</span> <span style="color:#e60000;">"deep"</span> <span style="color:#400000;font-weight:bold;">do</span> |t|
+t<span style="color:#806030;">.</span>number_of_workers <span style="color:#806030;">=</span> <span style="color:#c00000;">2</span>
+t<span style="color:#806030;">.</span>pattern <span style="color:#806030;">=</span> <span style="color:#e60000;">"test/{unit,functional,integration}/**/*_test.rb"</span>
+t<span style="color:#806030;">.</span>libs &lt;&lt; <span style="color:#e60000;">"test"</span>
+t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030;">=</span> <span style="color:#e60000;">"DeepTest::Database::MysqlSetupListener"</span>
+<span style="color:#400000;font-weight:bold;">end</span>
+</pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -808,59 +873,6 @@ E interessante anche quello che dice dopo, nel post originale, riguardo alla rel
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2008/02/05/a-ha-moment-finalmente-ho-capito-la-configurazione-di-dbcp/">[A-ha! Moment] Finalmente Ho Capito La Configurazione Di DBCP</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2008-02-05T00:00:00+01:00" pubdate data-updated="true">Feb 5<span>th</span>, 2008</time>
-        
-         | <a href="/blog/2008/02/05/a-ha-moment-finalmente-ho-capito-la-configurazione-di-dbcp/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">Questo post e&#8217; piu&#8217; che altro indirizzato a me stesso nel futuro, ma ovviamente se potesse servire ad altri, ora o nel futuro, ne saro&#8217; contento.
-
-Ho finalmente capito il significato dei parametri di configurazione di DBCP!
-I miei dubbi riguardavano in particolare i parametri <i>minIdle</i>, <i>maxIdle </i>e <i>maxActive</i>.
-
-Le connessioni aperte in un dato istante possono potenzialmente essere comprese tra zero e <i>maxActive</i>.
-
-Quando il n. di connessioni aperte e&#8217; compreso tra <i>maxIdle </i>e <i>maxActive</i>, tutte le connessioni ritornate al pool saranno immediatamente chiuse dal pool.
-
-Quando il n. di connessioni aperte e&#8217; compreso tra <i>minIdle </i>e <i>maxIdle</i>, tutte le connessioni ritornate al pool saranno soggette all&#8217;eventuale evictor (che si attiva con la prop <i>timeBetweenEvictionRunsMillis</i>). Questo significa che quando l&#8217;evictor parte, chiudera&#8217; tutte le connessioni in eccedenza (rispetto a <i>minIdle</i>), ovviamente secondo le impostazioni dei parametri <i>numTestsPerEvictionRun </i>e <i>minEvictableIdleTimeMillis </i>(quest&#8217;ultima in particolare indica quando tempo una connessione &#8216;in eccesso&#8217; puo&#8217; rimanere idle nel pool prima di essere considerata &#8216;chiudibile&#8217; dall&#8217;evictor thread).
-
-Quando il n. di connessioni aperte e&#8217; compreso tra zero e <i>minIdle</i>, tutte le connessioni ritornate al pool saranno lasciate nel pool. In altre parole non si dovrebbe mai scendere al di sotto di <i>minIdle </i>connessioni aperte verso il db.
-
-Ora, magari questo puo&#8217; sembrare scontato a voi, ma a me no!  DBCP ha una documentazione piuttosto fumosa, e in particolare faccio ancora fatica a capire la differenza tra i vari parametri di configurazione&#8230; per esempio, cosa si intende per abandonedConnection? E come si distingue da una normale connessione idle?
-
-Comunque intanto mi godo il mio <i>a-ha! moment</i> :)
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -878,6 +890,10 @@ Comunque intanto mi godo il mio <i>a-ha! moment</i> :)
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
       </li>
     
@@ -891,10 +907,6 @@ Comunque intanto mi godo il mio <i>a-ha! moment</i> :)
     
       <li class="post">
         <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on &#8220;static&#8221; Rails data model</a>
       </li>
     
   </ul>

@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="Venerdi&#8217; primo dicembre ho partecipato al secondo Agile Day, organizzato a Milano al Centro congressi MilanoFiori. Innanzitutto devo &hellip;">
+  <meta name="description" content="Di recente ho seguito un thread intitolato &#8220;The Law of Demeter and Testability&#8221; sulla lista xp americana. A partire dal primo post di Jay &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,66 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2006/12/11/law-of-demeter/">Law of Demeter</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2006-12-11T00:00:00+01:00" pubdate data-updated="true">Dec 11<span>th</span>, 2006</time>
+        
+         | <a href="/blog/2006/12/11/law-of-demeter/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Di recente ho seguito un thread intitolato <a href="http://tech.groups.yahoo.com/group/extremeprogramming/messages/122627?threaded=1&amp;m=e&amp;var=1&amp;tidx=1" title="link al thread">&#8220;The Law of Demeter and Testability&#8221;</a> sulla lista xp americana.
+
+A partire dal primo post di <a href="http://www.jayflowers.com/WordPress/">Jay Flowers</a> (niente di travolgente), il discorso si e&#8217; poi spostato sulla legge di demeter di per se&#8217;, il cui &#8216;peso&#8217; personalmente non ho mai capito fino in fondo. Ne&#8217; tantomeno mi sembra che se ne parli molto, al contrario magari di altri principi piu&#8217; noti come OCP, DIP, LSP, SRP, eccetera.
+
+Alcuni messaggi di questo thread mi hanno fatto capire meglio questo &#8216;principio&#8217; (chiamarla legge fa un po&#8217; ridere) e a vederlo in un&#8217;ottica diversa.
+
+Vi sottopongo gli spunti piu&#8217; interessanti, sperando possano esservi di stimolo quanto lo sono stati per me
+
+Michael Feathers:
+<blockquote><em> It&#8217;s a great article, but the thing to remember about LoD is that it is not iron-clad. There are cases where you&#8217;re better off not having demetered code. The classic example is the Excel Object model. You get the workbook from the application and the worksheet from the workbook, and drill down through ranges to cells. It works because the model is very stable. </em>
+
+<em>In general, when the structure of data has meaning, LoD gets in the way; when you care more about behavior (and usually you can), LoD is the way to go. </em></blockquote>
+Ron Jeffries:
+<blockquote><em> Yes &#8230; the observation about structure is a good one. If you think of what you&#8217;d have to do, otherwise, with the Excel model, you&#8217;d have to make each call to Excel, parameterized with workbook name, worksheet name, maybe range, then cell. Pulling the innards out amounts to an addressing prefix, or stepping down through a hierarchy.</em></blockquote>
+<blockquote><em>Mostly, though, I&#8217;d say LoD is the way to bet. </em></blockquote>
+E infine Brad Appleton:
+<blockquote><em>I actually took a class from Dr. Lieberherr on the full Demeter method (of which LoD is one small part). Having had the benefit of that, I think I have a lot of additional insight into the above.
+</em></blockquote>
+<blockquote><em>The issue with the LoD is that, the way it is usually stated, the assumption is any/every class in an O-O program should be exhibiting functional behavior and hiding the details of what it contains, and how it contain them.</em></blockquote>
+<blockquote><em>There are classes whose job is to encapsulate functional behavior/services, and there are classes whose job is to encapsulate structural behavior/services. That is to say that for some classes, the &#8220;secret&#8221; they need to &#8220;hide&#8221; isnt the fact that they contain some kinds of objects, but the details of HOW they contain those objects.
+Simple examples of these would be data-structures, lists, collections, iterators, dictionaries, data-stores, etc. Accessing the interfaces of the objects contained by such encapsulated structures actually doesnt violate the principle behind the LoD. But because of the way LoD is stated in such an oversimplified manner, those things appear to be violations when they really arent.</em></blockquote>
+<blockquote><em>When a method-call returns a subobject of its containing object, then consider that invocation to be a violation of LOD *only* *if* the containing object is supposed to encapsulate behavior concerning its subobjects. If the object really only needs to encapsulate structural details about HOW it contains that object (rather than WHAT it contains), then it&#8217;s not really a violation of LoD.</em></blockquote>
+<blockquote><em>So it&#8217;s less about whather or not the caller cares about the behavior or structure of the data, it more about whather the callee cares about (should be encapsulating) the behavior or the structure of what it contains. </em></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -363,6 +423,10 @@ Suonera&#8217; un po&#8217; eccessivo, ma qualcuno diceva che la programmazione 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
       </li>
     
@@ -376,10 +440,6 @@ Suonera&#8217; un po&#8217; eccessivo, ma qualcuno diceva che la programmazione 
     
       <li class="post">
         <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on &#8220;static&#8221; Rails data model</a>
       </li>
     
   </ul>

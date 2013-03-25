@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="How handy is the attr_reader method? Very handy indeed. Never asked yourself how it may be implemented? Just do it! This is my take: module Kernel &hellip;">
+  <meta name="description" content="Trello meets tracking Trello is a very good surrogate for a physical team board: it&#8217;s simple and effective, and it can really help when you &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,233 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: The Trello Effort Tracker Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-18T23:27:00+01:00" pubdate data-updated="true">Mar 18<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Trello meets tracking</h2>
+
+<p><a href="https://trello.com">Trello</a> is a very good surrogate for a physical team board: it&#8217;s simple and effective, and it can really help when you have a distributed team.
+That said, Trello (still) doesn&#8217;t offer a way to track time estimated and actually spent on cards, though many people are <a href="https://trello.com/card/time-tracking/4d5ea62fd76aa1136000000c/1054">asking for that feature</a> on Trello&#8217;s development board.</p>
+
+<p>I had such precise need while working with one of our teams, so I came up with the following idea: using Trello&#8217;s mention system to send tracking notifications to a predefined board member (I call him the &#8216;tracking user&#8217;), collecting along this way all tracking events such as estimates and efforts.</p>
+
+<p><img src="https://raw.github.com/xpepper/tracco/master/images/tracking_example.png" alt="A tracking example" /></p>
+
+<p>Then I built a simple tool to persist and aggregate this data, so that it would have been possible to show interesting metrics such as estimate errors. I called this tool <a href="https://github.com/xpepper/tracco">Tracco</a>: a gem to help track estimates and efforts from Trello.</p>
+
+<p><a href="https://github.com/xpepper/tracco">Tracco</a> is a gem, and you can use it as is, but it&#8217;s intended use is inside an app which displays collected data.
+To give an idea of what I mean, I developed a bare minimum Rails app to properly present card estimates and efforts: it&#8217;s called <a href="https://github.com/xpepper/trello_effort_app">Trello Effort App</a>. It&#8217;s really simple, but I wish it could be improved with the help of other committers :O)</p>
+
+<h2>More details</h2>
+
+<p>To start using <a href="https://github.com/xpepper/tracco">Tracco</a> you should have a Trello account, a Trello board and a board member to use as &#8216;tracking user&#8217;.
+You&#8217;ll also need to know your Trello developer key and generate a proper auth token to have access to the trackinguser&#8217;s notifications.
+To see how to have these two keys, read <a href="#api_key">the following section</a>.</p>
+
+<p>The Trello API is used behind the scenes to read data from the team board. <a href="https://github.com/xpepper/tracco">Tracco</a> uses the awesome <a href="https://github.com/jeremytregunna/ruby-trello">Trello API Ruby wrapper</a> for this purpose.</p>
+
+<h3>An example</h3>
+
+<p>Here I show an example of how you could use <a href="https://github.com/xpepper/tracco">Tracco</a>. For more info please refer to the <a href="https://github.com/xpepper/tracco/blob/master/README.md">official README</a>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git://github.com/xpepper/tracco.git
+</span><span class='line'>cd tracco
+</span><span class='line'>bundle install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then run the initializer</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco --initialize</span></code></pre></td></tr></table></div></figure>
+
+
+<p>to create the two configuration files, which you&#8217;ll need to edit properly (see <em>&#8220;Where do I get an API key and API secret?&#8221;</em> section).</p>
+
+<p>To fill the correct values for the mongodb environments (<a href="http://mongoid.org/en/mongoid/docs/installation.html#configuration">see here</a> to have more details).</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>MRI version 1.9.3+</li>
+<li><a href="http://www.mongodb.org/">mongoDB</a> - macosx users with homebrew will just run &#8216;brew install mongodb&#8217; to have mongoDB installed on their machine.</li>
+<li>(optional) <a href="https://rvm.io/rvm/install/">rvm</a> is useful (but optional) for development</li>
+</ul>
+
+
+<h3><a id="api_key"></a>Where do I get an API key?</h3>
+
+<p>Log in to Trello with your account and visit <a href="https://trello.com/1/appKey/generate">https://trello.com/1/appKey/generate</a> to get your developer_public_key.</p>
+
+<h3>Where do I get an API Access Token Key?</h3>
+
+<p>To generate a proper access token key, log in to Trello with the &#8216;tracking user&#8217; account. Then go to this URL:</p>
+
+<pre><code>https://trello.com/1/connect?key=&lt;YOUR_DEVELOPER_PUBLIC_KEY&gt;&amp;name=Tracco&amp;response_type=token&amp;scope=read&amp;expiration=never
+</code></pre>
+
+<p>At the end of this process, you&#8217;ll receive a valid access_token_key, which is needed by Tracco to have the proper rights to fetch all the tracking notifications sent as comments to the &#8216;tracking user&#8217;.</p>
+
+<h2>Collecting data from Trello</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco collect today --environment test # will extract today's tracked data and store on the test db
+</span><span class='line'>
+</span><span class='line'>tracco collect today  # will extract today's tracked data and store on the default (that is development) db
+</span><span class='line'>
+</span><span class='line'>tracco collect 2012-11-1 --environment production  # will extract tracked data starting from November the 1st, 2012 and store them into the production db</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Console</h3>
+
+<p>You can open a irb console with the ruby-trello gem and this gem loaded, so that you can query the db or the Trello API and play with them</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco console</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The default env is development. To load a console in the (e.g.) production db env, execute:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco console -e production</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Estimate format convention</h2>
+
+<p>To set an estimate on a card, a Trello user should send a notification from that card to the tracker username, e.g.</p>
+
+<pre><code>@trackinguser [15p]
+@trackinguser [1.5d]
+@trackinguser [12h]
+</code></pre>
+
+<p>estimates can be given in hours (h), days (d/g) or pomodori (p).</p>
+
+<pre><code>@trackinguser 22.11.2012 [4h]
+</code></pre>
+
+<p>will add the estimate (4 hours) in date 22.11.2012.</p>
+
+<h2>Effort format convention</h2>
+
+<p>To set an effort in the current day on a card, a Trello user should send a notification from that card to the tracker username, e.g.</p>
+
+<pre><code>@trackinguser +6p
+@trackinguser +4h
+@trackinguser +0.5g
+</code></pre>
+
+<p>efforts can be given in hours (h), days (d/g) or pomodori (p).</p>
+
+<h3>Tracking an effort in a specific date</h3>
+
+<p>To set an effort in a date different from the notification date, just add a date in the message</p>
+
+<pre><code>@trackinguser 23.10.2012 +6p
+</code></pre>
+
+<p>There&#8217;s even a shortcut for efforts spent yesterday:</p>
+
+<pre><code>@trackinguser yesterday +6p
+@trackinguser +6p yesterday
+</code></pre>
+
+<h3>Tracking an effort on more members</h3>
+
+<p>By default, the effort is tracked on the member which sends the tracking notification.</p>
+
+<p>To set an effort for more than a Trello user (e.g. pair programming), just add the other user in the message, e.g.</p>
+
+<pre><code>@trackinguser +3p @alessandrodescovi
+</code></pre>
+
+<p>To set an effort just for other Trello users (excluding the current user), just include the users in round brackets, e.g.</p>
+
+<pre><code>@trackinguser +3p (@alessandrodescovi @michelevincenzi)
+</code></pre>
+
+<h3>Tracking a card as finished (aka DONE)</h3>
+
+<p>Sending a tracking notification with the word DONE</p>
+
+<pre><code>@trackinguser DONE
+</code></pre>
+
+<p>will mark the card as closed.</p>
+
+<p>Moreover, a card moved into a DONE column (the name of the Trello list contains the word &#8220;Done&#8221;) is automatically marked as done.</p>
+
+<h2>Google Docs exporter</h2>
+
+<p>To export all your tracked cards on a google docs named &#8216;my_sheet&#8217; in the &#8216;tracking&#8217; worksheet, run</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco export_google_docs my_sheet tracking -e production</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The default env is development.</p>
+
+<p>If you provide no name for the spreadsheet, a default name will be used.
+If the spreadsheet name you provide does not exists, it will be created in you google drive account.</p>
+
+<p>So, running simply</p>
+
+<figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">tracco</span> <span class="n">export_google_docs</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>will create (or update) a spreadsheet named &#8220;trello effort tracking&#8221; using the development db env.</p>
+
+<h2>Roadmap and improvements</h2>
+
+<p>I develop <a href="https://github.com/xpepper/tracco">Tracco</a> using <a href="https://trello.com/board/trello-effort-tracker-roadmap/509c3228dcb1ac3f1c018791">Trello itself</a>.</p>
+
+<h2>Contributing</h2>
+
+<p>If you&#8217;d like to hack on <a href="https://github.com/xpepper/tracco">Tracco</a>, start by forking the repo on GitHub:</p>
+
+<p>https://github.com/xpepper/tracco</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -808,71 +1035,6 @@ The actual steps to fix my webrat gem (I use Selenium through Webrat) were
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/01/18/one-and-a-half-useful-thing-to-know-when-using-deeptest-gem-with-mysql/">One (and a Half) Useful Thing to Know When Using DeepTest Gem With MySQL</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-01-18T00:00:00+01:00" pubdate data-updated="true">Jan 18<span>th</span>, 2010</time>
-        
-         | <a href="/blog/2010/01/18/one-and-a-half-useful-thing-to-know-when-using-deeptest-gem-with-mysql/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><a href="http://github.com/qxjit/deep-test">DeepTest</a> currently won&#8217;t work if you&#8217;ve configured MySQL with no password (in other words, if you are able to connect to mysql with a simple &#8220;mysql -u root&#8221;).
-To fix this, you have to patch DeepTest (I know, asap I&#8217;ll go through the whole process to propose the patch to the original project leader).
-Actually, you have to comment out a line, in the <em>DeepTest:Database:MysqlSetupListener#grant_privileges </em>method:
-<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
-<span style="color:#400000;font-weight:bold;">def</span> grant_privileges<span style="color:#806030;">(</span>connection<span style="color:#806030;">)</span>
-sql <span style="color:#806030;">=</span> %<span style="color:#806030;">{</span>grant all on <span style="color:#c34e00;">#{worker_database}.*</span>
-to %s@<span style="color:#e60000;">'localhost'</span>;<span style="color:#806030;">}</span> % <span style="color:#806030;">[</span>
-connection<span style="color:#806030;">.</span>quote<span style="color:#806030;">(</span>worker_database_config<span style="color:#806030;">[</span>:username<span style="color:#806030;">]</span><span style="color:#806030;">)</span><span style="color:#c34e00;"># ,</span>
-<span style="color:#c34e00;"># connection.quote(worker_database_config[:password])  &lt;-- mysql with no password won't work</span>
-<span style="color:#806030;">]</span>
-connection<span style="color:#806030;">.</span>execute sql
-<span style="color:#400000;font-weight:bold;">end</span>
-<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
-</pre>
-Another tip (the &#8220;half&#8221; in the blog post title):
-Don&#8217;t forget to edit the &#8220;pattern&#8221; option in your DeepTest rake task, to be able to grab all the testcases you want.
-In my case, I want to skip a whole folder containing selenium tests, so I have to write my Deep Test rake file this way:
-(in <em>/lib/tasks/test.rake</em>)
-<pre style="background:#f1f0f0 none repeat scroll 0 0;color:#000000;padding-left:30px;"><span style="color:#800000;font-weight:bold;">require</span> <span style="color:#e60000;">"deep_test/rake_tasks"</span>
-<span style="color:#806030;">.</span><span style="color:#806030;">.</span><span style="color:#806030;">.</span>
-
-DeepTest::TestTask<span style="color:#806030;">.</span><span style="color:#400000;font-weight:bold;">new</span> <span style="color:#e60000;">"deep"</span> <span style="color:#400000;font-weight:bold;">do</span> |t|
-t<span style="color:#806030;">.</span>number_of_workers <span style="color:#806030;">=</span> <span style="color:#c00000;">2</span>
-t<span style="color:#806030;">.</span>pattern <span style="color:#806030;">=</span> <span style="color:#e60000;">"test/{unit,functional,integration}/**/*_test.rb"</span>
-t<span style="color:#806030;">.</span>libs &lt;&lt; <span style="color:#e60000;">"test"</span>
-t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030;">=</span> <span style="color:#e60000;">"DeepTest::Database::MysqlSetupListener"</span>
-<span style="color:#400000;font-weight:bold;">end</span>
-</pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -888,6 +1050,10 @@ t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/02/12/learning-ruby-reimplementing-it-attr_reader/">Learning Ruby reimplementing it: attr_reader</a>
       </li>
     
@@ -901,10 +1067,6 @@ t<span style="color:#806030;">.</span>worker_listener <span style="color:#806030
     
       <li class="post">
         <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/">Dynamically add data accessor methods on &#8220;static&#8221; Rails data model</a>
       </li>
     
   </ul>

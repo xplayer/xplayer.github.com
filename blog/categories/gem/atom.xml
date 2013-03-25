@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Gem | XPlayer]]></title>
+  <link href="http://xplayer.github.com/blog/categories/gem/atom.xml" rel="self"/>
+  <link href="http://xplayer.github.com/"/>
+  <updated>2013-03-26T00:27:02+01:00</updated>
+  <id>http://xplayer.github.com/</id>
+  <author>
+    <name><![CDATA[Pietro Di Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Introducing Tracco: the Trello Effort Tracker gem]]></title>
+    <link href="http://xplayer.github.com/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/"/>
+    <updated>2013-03-18T23:27:00+01:00</updated>
+    <id>http://xplayer.github.com/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem</id>
+    <content type="html"><![CDATA[<h2>Trello meets tracking</h2>
+
+<p><a href="https://trello.com">Trello</a> is a very good surrogate for a physical team board: it's simple and effective, and it can really help when you have a distributed team.
+That said, Trello (still) doesn't offer a way to track time estimated and actually spent on cards, though many people are <a href="https://trello.com/card/time-tracking/4d5ea62fd76aa1136000000c/1054">asking for that feature</a> on Trello's development board.</p>
+
+<p>I had such precise need while working with one of our teams, so I came up with the following idea: using Trello's mention system to send tracking notifications to a predefined board member (I call him the 'tracking user'), collecting along this way all tracking events such as estimates and efforts.</p>
+
+<p><img src="https://raw.github.com/xpepper/tracco/master/images/tracking_example.png" alt="A tracking example" /></p>
+
+<p>Then I built a simple tool to persist and aggregate this data, so that it would have been possible to show interesting metrics such as estimate errors. I called this tool <a href="https://github.com/xpepper/tracco">Tracco</a>: a gem to help track estimates and efforts from Trello.</p>
+
+<p><a href="https://github.com/xpepper/tracco">Tracco</a> is a gem, and you can use it as is, but it's intended use is inside an app which displays collected data.
+To give an idea of what I mean, I developed a bare minimum Rails app to properly present card estimates and efforts: it's called <a href="https://github.com/xpepper/trello_effort_app">Trello Effort App</a>. It's really simple, but I wish it could be improved with the help of other committers :O)</p>
+
+<h2>More details</h2>
+
+<p>To start using <a href="https://github.com/xpepper/tracco">Tracco</a> you should have a Trello account, a Trello board and a board member to use as 'tracking user'.
+You'll also need to know your Trello developer key and generate a proper auth token to have access to the trackinguser's notifications.
+To see how to have these two keys, read <a href="#api_key">the following section</a>.</p>
+
+<p>The Trello API is used behind the scenes to read data from the team board. <a href="https://github.com/xpepper/tracco">Tracco</a> uses the awesome <a href="https://github.com/jeremytregunna/ruby-trello">Trello API Ruby wrapper</a> for this purpose.</p>
+
+<h3>An example</h3>
+
+<p>Here I show an example of how you could use <a href="https://github.com/xpepper/tracco">Tracco</a>. For more info please refer to the <a href="https://github.com/xpepper/tracco/blob/master/README.md">official README</a>.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git://github.com/xpepper/tracco.git
+</span><span class='line'>cd tracco
+</span><span class='line'>bundle install</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Then run the initializer
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco --initialize</span></code></pre></td></tr></table></div></figure></notextile></div>
+to create the two configuration files, which you'll need to edit properly (see <em>"Where do I get an API key and API secret?"</em> section).</p>
+
+<p>To fill the correct values for the mongodb environments (<a href="http://mongoid.org/en/mongoid/docs/installation.html#configuration">see here</a> to have more details).</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>MRI version 1.9.3+</li>
+<li><a href="http://www.mongodb.org/">mongoDB</a> - macosx users with homebrew will just run 'brew install mongodb' to have mongoDB installed on their machine.</li>
+<li>(optional) <a href="https://rvm.io/rvm/install/">rvm</a> is useful (but optional) for development</li>
+</ul>
+
+
+<h3><a id="api_key"></a>Where do I get an API key?</h3>
+
+<p>Log in to Trello with your account and visit <a href="https://trello.com/1/appKey/generate">https://trello.com/1/appKey/generate</a> to get your developer_public_key.</p>
+
+<h3>Where do I get an API Access Token Key?</h3>
+
+<p>To generate a proper access token key, log in to Trello with the 'tracking user' account. Then go to this URL:</p>
+
+<pre><code>https://trello.com/1/connect?key=&lt;YOUR_DEVELOPER_PUBLIC_KEY&gt;&amp;name=Tracco&amp;response_type=token&amp;scope=read&amp;expiration=never
+</code></pre>
+
+<p>At the end of this process, you'll receive a valid access_token_key, which is needed by Tracco to have the proper rights to fetch all the tracking notifications sent as comments to the 'tracking user'.</p>
+
+<h2>Collecting data from Trello</h2>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco collect today --environment test # will extract today's tracked data and store on the test db&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>tracco collect today  # will extract today's tracked data and store on the default (that is development) db&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>tracco collect 2012-11-1 --environment production  # will extract tracked data starting from November the 1st, 2012 and store them into the production db</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Console</h3>
+
+<p>You can open a irb console with the ruby-trello gem and this gem loaded, so that you can query the db or the Trello API and play with them</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco console</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The default env is development. To load a console in the (e.g.) production db env, execute:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco console -e production</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h2>Estimate format convention</h2>
+
+<p>To set an estimate on a card, a Trello user should send a notification from that card to the tracker username, e.g.</p>
+
+<pre><code>@trackinguser [15p]
+@trackinguser [1.5d]
+@trackinguser [12h]
+</code></pre>
+
+<p>estimates can be given in hours (h), days (d/g) or pomodori (p).</p>
+
+<pre><code>@trackinguser 22.11.2012 [4h]
+</code></pre>
+
+<p>will add the estimate (4 hours) in date 22.11.2012.</p>
+
+<h2>Effort format convention</h2>
+
+<p>To set an effort in the current day on a card, a Trello user should send a notification from that card to the tracker username, e.g.</p>
+
+<pre><code>@trackinguser +6p
+@trackinguser +4h
+@trackinguser +0.5g
+</code></pre>
+
+<p>efforts can be given in hours (h), days (d/g) or pomodori (p).</p>
+
+<h3>Tracking an effort in a specific date</h3>
+
+<p>To set an effort in a date different from the notification date, just add a date in the message</p>
+
+<pre><code>@trackinguser 23.10.2012 +6p
+</code></pre>
+
+<p>There's even a shortcut for efforts spent yesterday:</p>
+
+<pre><code>@trackinguser yesterday +6p
+@trackinguser +6p yesterday
+</code></pre>
+
+<h3>Tracking an effort on more members</h3>
+
+<p>By default, the effort is tracked on the member which sends the tracking notification.</p>
+
+<p>To set an effort for more than a Trello user (e.g. pair programming), just add the other user in the message, e.g.</p>
+
+<pre><code>@trackinguser +3p @alessandrodescovi
+</code></pre>
+
+<p>To set an effort just for other Trello users (excluding the current user), just include the users in round brackets, e.g.</p>
+
+<pre><code>@trackinguser +3p (@alessandrodescovi @michelevincenzi)
+</code></pre>
+
+<h3>Tracking a card as finished (aka DONE)</h3>
+
+<p>Sending a tracking notification with the word DONE</p>
+
+<pre><code>@trackinguser DONE
+</code></pre>
+
+<p>will mark the card as closed.</p>
+
+<p>Moreover, a card moved into a DONE column (the name of the Trello list contains the word "Done") is automatically marked as done.</p>
+
+<h2>Google Docs exporter</h2>
+
+<p>To export all your tracked cards on a google docs named 'my_sheet' in the 'tracking' worksheet, run</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tracco export_google_docs my_sheet tracking -e production</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The default env is development.</p>
+
+<p>If you provide no name for the spreadsheet, a default name will be used.
+If the spreadsheet name you provide does not exists, it will be created in you google drive account.</p>
+
+<p>So, running simply</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">tracco</span> <span class="n">export_google_docs</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+will create (or update) a spreadsheet named "trello effort tracking" using the development db env.</p>
+
+<h2>Roadmap and improvements</h2>
+
+<p>I develop <a href="https://github.com/xpepper/tracco">Tracco</a> using <a href="https://trello.com/board/trello-effort-tracker-roadmap/509c3228dcb1ac3f1c018791">Trello itself</a>.</p>
+
+<h2>Contributing</h2>
+
+<p>If you'd like to hack on <a href="https://github.com/xpepper/tracco">Tracco</a>, start by forking the repo on GitHub:</p>
+
+<p>https://github.com/xpepper/tracco</p>
+]]></content>
+  </entry>
+  
+</feed>
