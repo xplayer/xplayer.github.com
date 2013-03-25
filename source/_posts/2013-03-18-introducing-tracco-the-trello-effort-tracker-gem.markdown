@@ -43,12 +43,6 @@ to create the two configuration files, which you'll need to edit properly (see _
 
 To fill the correct values for the mongodb environments ([see here](http://mongoid.org/en/mongoid/docs/installation.html#configuration) to have more details).
 
-## Requirements
-* MRI version 1.9.3+
-* [mongoDB](http://www.mongodb.org/) - macosx users with homebrew will just run 'brew install mongodb' to have mongoDB installed on their machine.
-* (optional) [rvm](https://rvm.io/rvm/install/) is useful (but optional) for development
-
-
 ### <a id="api_key"></a>Where do I get an API key?
 Log in to Trello with your account and visit [https://trello.com/1/appKey/generate](https://trello.com/1/appKey/generate) to get your developer\_public\_key.
 
@@ -151,6 +145,11 @@ So, running simply
 tracco export_google_docs
 {% endcodeblock %}
 will create (or update) a spreadsheet named "trello effort tracking" using the development db env.
+
+## Requirements
+* MRI version 1.9.3+
+* [mongoDB](http://www.mongodb.org/) - macosx users with homebrew will just run 'brew install mongodb' to have mongoDB installed on their machine.
+* (optional) [rvm](https://rvm.io/rvm/install/) is useful (but optional) for development
 
 ## Roadmap and improvements
 I develop [Tracco](https://github.com/xpepper/tracco) using [Trello itself](https://trello.com/board/trello-effort-tracker-roadmap/509c3228dcb1ac3f1c018791).
