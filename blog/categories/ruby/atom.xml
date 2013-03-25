@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | XPlayer]]></title>
   <link href="http://xplayer.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://xplayer.github.com/"/>
-  <updated>2013-03-26T00:29:09+01:00</updated>
+  <updated>2013-03-26T00:31:35+01:00</updated>
   <id>http://xplayer.github.com/</id>
   <author>
     <name><![CDATA[Pietro Di Bello]]></name>
@@ -57,15 +57,6 @@ To see how to have these two keys, read <a href="#api_key">the following section
 to create the two configuration files, which you'll need to edit properly (see <em>"Where do I get an API key and API secret?"</em> section).</p>
 
 <p>To fill the correct values for the mongodb environments (<a href="http://mongoid.org/en/mongoid/docs/installation.html#configuration">see here</a> to have more details).</p>
-
-<h2>Requirements</h2>
-
-<ul>
-<li>MRI version 1.9.3+</li>
-<li><a href="http://www.mongodb.org/">mongoDB</a> - macosx users with homebrew will just run 'brew install mongodb' to have mongoDB installed on their machine.</li>
-<li>(optional) <a href="https://rvm.io/rvm/install/">rvm</a> is useful (but optional) for development</li>
-</ul>
-
 
 <h3><a id="api_key"></a>Where do I get an API key?</h3>
 
@@ -188,6 +179,15 @@ If the spreadsheet name you provide does not exists, it will be created in you g
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">tracco</span> <span class="n">export_google_docs</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 will create (or update) a spreadsheet named "trello effort tracking" using the development db env.</p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>MRI version 1.9.3+</li>
+<li><a href="http://www.mongodb.org/">mongoDB</a> - macosx users with homebrew will just run 'brew install mongodb' to have mongoDB installed on their machine.</li>
+<li>(optional) <a href="https://rvm.io/rvm/install/">rvm</a> is useful (but optional) for development</li>
+</ul>
+
 
 <h2>Roadmap and improvements</h2>
 
