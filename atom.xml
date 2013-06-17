@@ -4,7 +4,7 @@
   <title><![CDATA[XPlayer]]></title>
   <link href="http://xplayer.github.com/atom.xml" rel="self"/>
   <link href="http://xplayer.github.com/"/>
-  <updated>2013-06-18T00:41:04+02:00</updated>
+  <updated>2013-06-18T00:48:13+02:00</updated>
   <id>http://xplayer.github.com/</id>
   <author>
     <name><![CDATA[Pietro Di Bello]]></name>
@@ -33,7 +33,7 @@ read.mysite.com
 
 <p>This is the solution we came up with (tested on Rails 2.3.4): it&#8217;s a simple middleware.</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -58,36 +58,37 @@ read.mysite.com
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class SetCookieDomain
-</span><span class='line'>  def initialize(app)
-</span><span class='line'>    @app = app
-</span><span class='line'>  end
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SetCookieDomain</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@app</span> <span class="o">=</span> <span class="n">app</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  def call(env)
-</span><span class='line'>    subdomain = remove_innermost_domain_from(env["SERVER_NAME"])
-</span><span class='line'>    env["rack.session.options"][:domain] = subdomain
-</span><span class='line'>    log "forced cookie domain to #{subdomain}"
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">subdomain</span> <span class="o">=</span> <span class="n">remove_innermost_domain_from</span><span class="p">(</span><span class="n">env</span><span class="o">[</span><span class="s2">&quot;SERVER_NAME&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">env</span><span class="o">[</span><span class="s2">&quot;rack.session.options&quot;</span><span class="o">][</span><span class="ss">:domain</span><span class="o">]</span> <span class="o">=</span> <span class="n">subdomain</span>
+</span><span class='line'>    <span class="n">log</span> <span class="s2">&quot;forced cookie domain to </span><span class="si">#{</span><span class="n">subdomain</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span class='line'>
-</span><span class='line'>    @app.call(env)
-</span><span class='line'>  end
+</span><span class='line'>    <span class="vi">@app</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  private
+</span><span class='line'>  <span class="kp">private</span>
 </span><span class='line'>
-</span><span class='line'>  def remove_innermost_domain_from(server_name)
-</span><span class='line'>    server_name.gsub(/^[^.]*/, '')
-</span><span class='line'>  end
+</span><span class='line'>  <span class="k">def</span> <span class="nf">remove_innermost_domain_from</span><span class="p">(</span><span class="n">server_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">server_name</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/^[^.]*/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  def log(message)
-</span><span class='line'>    RAILS_DEFAULT_LOGGER.info("========")
-</span><span class='line'>    RAILS_DEFAULT_LOGGER.info(message)
-</span><span class='line'>    RAILS_DEFAULT_LOGGER.info("========")
-</span><span class='line'>  end
-</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">RAILS_DEFAULT_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;========&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">RAILS_DEFAULT_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">RAILS_DEFAULT_LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;========&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>And this is a spec:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -111,36 +112,38 @@ read.mysite.com
 <span class='line-number'>22</span>
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>describe SetCookieDomain do
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">SetCookieDomain</span> <span class="k">do</span>
 </span><span class='line'>
-</span><span class='line'>  let(:app) { stub("app", :call => "") }
-</span><span class='line'>  let(:set_cookie_domain) { SetCookieDomain.new(app) }
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="p">{</span> <span class="n">stub</span><span class="p">(</span><span class="s2">&quot;app&quot;</span><span class="p">,</span> <span class="ss">:call</span> <span class="o">=&gt;</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:set_cookie_domain</span><span class="p">)</span> <span class="p">{</span> <span class="no">SetCookieDomain</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">app</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>  before(:each) do
-</span><span class='line'>    @env = {
-</span><span class='line'>      "SERVER_NAME" => "store.any.it", "SERVER_PORT" => "3000",
-</span><span class='line'>      "HTTP_HOST"   => "store.any.it:3000",
-</span><span class='line'>      "REQUEST_URI" => "/",
-</span><span class='line'>      "rack.session.options" => { :path => "/", :key => "_session_id", :expire_after => nil, :httponly => true, :domain => nil, :id => "any_id" },
-</span><span class='line'>    }
-</span><span class='line'>  end
+</span><span class='line'>  <span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@env</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;SERVER_NAME&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;store.any.it&quot;</span><span class="p">,</span> <span class="s2">&quot;SERVER_PORT&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;3000&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;HTTP_HOST&quot;</span>   <span class="o">=&gt;</span> <span class="s2">&quot;store.any.it:3000&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;REQUEST_URI&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;rack.session.options&quot;</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="ss">:key</span> <span class="o">=&gt;</span> <span class="s2">&quot;_session_id&quot;</span><span class="p">,</span> <span class="ss">:expire_after</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">,</span> <span class="ss">:httponly</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:domain</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">,</span> <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;any_id&quot;</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'>  it "forces the session cookie domain to be the second-level domain of the full domain name" do
-</span><span class='line'>    @env["SERVER_NAME"] = "store.xpeppers.com"
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;forces the session cookie domain to be the second-level domain of the full domain name&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@env</span><span class="o">[</span><span class="s2">&quot;SERVER_NAME&quot;</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;store.xpeppers.com&quot;</span>
 </span><span class='line'>
-</span><span class='line'>    @env["rack.session.options"][:domain].should be_nil
+</span><span class='line'>    <span class="vi">@env</span><span class="o">[</span><span class="s2">&quot;rack.session.options&quot;</span><span class="o">][</span><span class="ss">:domain</span><span class="o">].</span><span class="n">should</span> <span class="n">be_nil</span>
 </span><span class='line'>
-</span><span class='line'>    set_cookie_domain.call(@env)
+</span><span class='line'>    <span class="n">set_cookie_domain</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="vi">@env</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'>    @env["rack.session.options"][:domain].should == ".xpeppers.com"
-</span><span class='line'>  end
-</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>    <span class="vi">@env</span><span class="o">[</span><span class="s2">&quot;rack.session.options&quot;</span><span class="o">][</span><span class="ss">:domain</span><span class="o">].</span><span class="n">should</span> <span class="o">==</span> <span class="s2">&quot;.xpeppers.com&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>To enable the middleware, you&#8217;ve to put this line in your Rails startup files (e.g. environment.rb)</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>config.middleware.use "SetCookieDomain"</span></code></pre></td></tr></table></div></figure>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">use</span> <span class="s2">&quot;SetCookieDomain&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 
