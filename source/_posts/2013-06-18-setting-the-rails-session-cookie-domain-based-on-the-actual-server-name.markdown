@@ -21,7 +21,7 @@ We needed just this for our e-commerce platform, which supports multiple stores 
 
 This is the solution we came up with (tested on Rails 2.3.4): it's a simple middleware.
 
-{% codeblock %}
+``` ruby
 class SetCookieDomain
   def initialize(app)
     @app = app
@@ -47,11 +47,11 @@ class SetCookieDomain
     RAILS_DEFAULT_LOGGER.info("========")
   end
 end
-{% endcodeblock %}
+```
 
 And this is a spec:
 
-{% codeblock %}
+``` ruby
 describe SetCookieDomain do
 
   let(:app) { stub("app", :call => "") }
@@ -76,11 +76,11 @@ describe SetCookieDomain do
     @env["rack.session.options"][:domain].should == ".xpeppers.com"
   end
 end
-{% endcodeblock %}
+```
 
 To enable the middleware, you've to put this line in your Rails startup files (e.g. environment.rb)
 
-{% codeblock %}
+``` ruby
 config.middleware.use "SetCookieDomain"
-{% endcodeblock %}
+```
 
