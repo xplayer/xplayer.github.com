@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="Questo post e&#8217; piu&#8217; che altro indirizzato a me stesso nel futuro, ma ovviamente se potesse servire ad altri, ora o nel futuro, ne saro&# &hellip;">
+  <meta name="description" content="Da un articolo di InfoQ, la posizione di M.Feathers sul testare i metodi privati: Michael Feathers suggested last year in The Deep Synergy Between &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2008/02/08/michael-feathers-on-testing-private-methods/">Michael Feathers on Testing Private Methods</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2008-02-08T00:00:00+01:00" pubdate data-updated="true">Feb 8<span>th</span>, 2008</time>
+        
+         | <a href="/blog/2008/02/08/michael-feathers-on-testing-private-methods/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">Da <a href="http://www.infoq.com/news/2008/01/private-methods-tdd-design">un articolo di InfoQ,</a> la posizione di M.Feathers sul testare i metodi privati:
+
+Michael Feathers suggested last year in <a href="http://michaelfeathers.typepad.com/michael_feathers_blog/2007/09/the-deep-synerg.html">The Deep Synergy Between Testability and Good Design</a> that TDD encourages good design and, conversely, code that is not testable should make us think twice:
+<blockquote><i>When I write tests and I have the urge to test a private method, I take it as a hint. The hint tells me that my class is encapsulating so much that it has ceased to be &#8220;understandable&#8221; by tests through its public interface. I listen to the hint, and factor my design differently. Usually, I end up moving the private method (and possibly some methods around it) to a new class where it can be non-private and accessible to tests.</i></blockquote>
+Condivido al 100%!
+
+E interessante anche quello che dice dopo, nel post originale, riguardo alla relazione tra coupling, cohesion e testabilita&#8217;.
+<blockquote><i>In the end, it all comes down to cohesion and coupling.  If classes are deeply coupled with their neighbors, it is hard to control them in a test or observe them independently.  If a class isn&#8217;t cohesive, it may have some logic which is not easily exercisable through its public interface.</i>
+
+<i>It seems that reverse is true also.  Classes which are hard to instantiate and use in a test harness are more coupled than they could be, and classes with private methods that you feel the urge to test, invariably have some sort of cohesion problem: they have more than one responsibility.</i></blockquote>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -565,52 +612,6 @@ E poi testare questo thin layer con dei test di integrazione che garantiscano ch
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2007/04/26/ascoltare-i-propri-test-ovvero-migliorare-il-codice-partendo-dagli-smell-dei-propri-test/">Ascoltare I Propri Test, Ovvero Migliorare Il Codice Partendo Dagli Smell Dei Propri Test</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2007-04-26T00:00:00+02:00" pubdate data-updated="true">Apr 26<span>th</span>, 2007</time>
-        
-         | <a href="/blog/2007/04/26/ascoltare-i-propri-test-ovvero-migliorare-il-codice-partendo-dagli-smell-dei-propri-test/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">Steve Freeman e Nat Pryce hanno iniziato una serie di interessanti post sul loro blog <a href="http://www.mockobjects.com">mockobjects </a>sul tema dei <a href="http://www.mockobjects.com/labels/listening%20to%20the%20tests.html">Test Smells,</a>  ovvero su come &#8216;ascoltare&#8217; i propri test per scoprire possibilita&#8217; di miglioramento nel design del codice sotto test
-<blockquote><em>    In our experience, when we find that our tests are awkward to write, it&#8217;s usually because the design of our target code can be improved.</em></blockquote>
-Una cosa su cui mi trovo d&#8217;accordo, piu&#8217; che altro perche&#8217; ho avuto la stessa esperienza in passato (e anche nel presente!)
-
-<a href="http://xplayer.files.wordpress.com/2007/05/strip_paoladibello.jpg" title="Test Smells…"><img src="http://xplayer.files.wordpress.com/2007/05/strip_paoladibello.jpg" alt="Test Smells…" height="283" width="1278" /></a>
-
-Il primo post della serie e&#8217;  <a href="http://www.mockobjects.com/2007/04/test-smell-i-need-to-mock-object-i-cant.html">Test Smell: I need to mock an object I can&#8217;t replace (without magic)</a>,  dove si parte da un codice piuttosto &#8216;chiuso&#8217;, con dipendenze nascoste (magari usando dei Singleton), e passo passo lo si rifattorizza, aprendolo, prima introducendo un fake (o stub che dir si voglia) e poi passando ai mock, mostrando come il codice migliori, prima esplicitando le dipendenze e poi assegnando meglio le responsabilita&#8217;.
-
-Se vi capita dategli un&#8217;occhiata!
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -628,6 +629,10 @@ Se vi capita dategli un&#8217;occhiata!
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/">Setting the Rails session cookie domain based on the actual server name</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
       </li>
     
@@ -641,10 +646,6 @@ Se vi capita dategli un&#8217;occhiata!
     
       <li class="post">
         <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
       </li>
     
   </ul>

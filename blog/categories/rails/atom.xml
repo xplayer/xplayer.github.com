@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Rails | XPlayer]]></title>
+  <link href="http://xplayer.github.com/blog/categories/rails/atom.xml" rel="self"/>
+  <link href="http://xplayer.github.com/"/>
+  <updated>2013-06-18T00:41:04+02:00</updated>
+  <id>http://xplayer.github.com/</id>
+  <author>
+    <name><![CDATA[Pietro Di Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Setting the Rails session cookie domain based on the actual server name]]></title>
+    <link href="http://xplayer.github.com/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/"/>
+    <updated>2013-06-18T00:08:00+02:00</updated>
+    <id>http://xplayer.github.com/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name</id>
+    <content type="html"><![CDATA[<p>Say you have single Rails codebase publishing different apps with different domain names, all sharing a common higher-level domain name, for example:</p>
+
+<pre><code>store.mysite.com
+www.mysite.com
+read.mysite.com
+</code></pre>
+
+<p>and you want all these apps to share the same Rails session cookie.</p>
+
+<p>What you should do is set a proper domain in the session cookie, so that this domain is based on the current server name.</p>
+
+<p>We needed just this for our e-commerce platform, which supports multiple stores (and thus multiple domain names) on a single Rails app.</p>
+
+<p>This is the solution we came up with (tested on Rails 2.3.4): it's a simple middleware.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class SetCookieDomain
+</span><span class='line'>  def initialize(app)&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>@app = app
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  def call(env)&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>subdomain = remove_innermost_domain_from(env["SERVER_NAME"])
+</span><span class='line'>env["rack.session.options"][:domain] = subdomain
+</span><span class='line'>log "forced cookie domain to #{subdomain}"
+</span><span class='line'>
+</span><span class='line'>@app.call(env)
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  private&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  def remove_innermost_domain_from(server_name)&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>server_name.gsub(/^[^.]*/, '')
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  def log(message)&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>RAILS_DEFAULT_LOGGER.info("========")
+</span><span class='line'>RAILS_DEFAULT_LOGGER.info(message)
+</span><span class='line'>RAILS_DEFAULT_LOGGER.info("========")
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>And this is a spec:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>describe SetCookieDomain do&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  let(:app) { stub("app", :call => "") }
+</span><span class='line'>  let(:set_cookie_domain) { SetCookieDomain.new(app) }&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  before(:each) do&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>@env = {
+</span><span class='line'>  "SERVER_NAME" =&gt; "store.any.it", "SERVER_PORT" =&gt; "3000",
+</span><span class='line'>  "HTTP_HOST"   =&gt; "store.any.it:3000",
+</span><span class='line'>  "REQUEST_URI" =&gt; "/",
+</span><span class='line'>  "rack.session.options" =&gt; { :path =&gt; "/", :key =&gt; "_session_id", :expire_after =&gt; nil, :httponly =&gt; true, :domain =&gt; nil, :id =&gt; "any_id" },
+</span><span class='line'>}
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  it "forces the session cookie domain to be the second-level domain of the full domain name" do&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>@env["SERVER_NAME"] = "store.xpeppers.com"
+</span><span class='line'>
+</span><span class='line'>@env["rack.session.options"][:domain].should be_nil
+</span><span class='line'>
+</span><span class='line'>set_cookie_domain.call(@env)
+</span><span class='line'>
+</span><span class='line'>@env["rack.session.options"][:domain].should == ".xpeppers.com"
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  end
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>To enable the middleware, you've to put this line in your Rails startup files (e.g. environment.rb)</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>config.middleware.use "SetCookieDomain"</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>

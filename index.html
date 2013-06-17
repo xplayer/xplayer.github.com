@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="Trello meets tracking Trello is a very good surrogate for a physical team board: it&#8217;s simple and effective, and it can really help when you &hellip;">
+  <meta name="description" content="Say you have single Rails codebase publishing different apps with different domain names, all sharing a common higher-level domain name, for example &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,169 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/">Setting the Rails Session Cookie Domain Based on the Actual Server Name</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-18T00:08:00+02:00" pubdate data-updated="true">Jun 18<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Say you have single Rails codebase publishing different apps with different domain names, all sharing a common higher-level domain name, for example:</p>
+
+<pre><code>store.mysite.com
+www.mysite.com
+read.mysite.com
+</code></pre>
+
+<p>and you want all these apps to share the same Rails session cookie.</p>
+
+<p>What you should do is set a proper domain in the session cookie, so that this domain is based on the current server name.</p>
+
+<p>We needed just this for our e-commerce platform, which supports multiple stores (and thus multiple domain names) on a single Rails app.</p>
+
+<p>This is the solution we came up with (tested on Rails 2.3.4): it&#8217;s a simple middleware.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class SetCookieDomain
+</span><span class='line'>  def initialize(app)
+</span><span class='line'>    @app = app
+</span><span class='line'>  end
+</span><span class='line'>
+</span><span class='line'>  def call(env)
+</span><span class='line'>    subdomain = remove_innermost_domain_from(env["SERVER_NAME"])
+</span><span class='line'>    env["rack.session.options"][:domain] = subdomain
+</span><span class='line'>    log "forced cookie domain to #{subdomain}"
+</span><span class='line'>
+</span><span class='line'>    @app.call(env)
+</span><span class='line'>  end
+</span><span class='line'>
+</span><span class='line'>  private
+</span><span class='line'>
+</span><span class='line'>  def remove_innermost_domain_from(server_name)
+</span><span class='line'>    server_name.gsub(/^[^.]*/, '')
+</span><span class='line'>  end
+</span><span class='line'>
+</span><span class='line'>  def log(message)
+</span><span class='line'>    RAILS_DEFAULT_LOGGER.info("========")
+</span><span class='line'>    RAILS_DEFAULT_LOGGER.info(message)
+</span><span class='line'>    RAILS_DEFAULT_LOGGER.info("========")
+</span><span class='line'>  end
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And this is a spec:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>describe SetCookieDomain do
+</span><span class='line'>
+</span><span class='line'>  let(:app) { stub("app", :call => "") }
+</span><span class='line'>  let(:set_cookie_domain) { SetCookieDomain.new(app) }
+</span><span class='line'>
+</span><span class='line'>  before(:each) do
+</span><span class='line'>    @env = {
+</span><span class='line'>      "SERVER_NAME" => "store.any.it", "SERVER_PORT" => "3000",
+</span><span class='line'>      "HTTP_HOST"   => "store.any.it:3000",
+</span><span class='line'>      "REQUEST_URI" => "/",
+</span><span class='line'>      "rack.session.options" => { :path => "/", :key => "_session_id", :expire_after => nil, :httponly => true, :domain => nil, :id => "any_id" },
+</span><span class='line'>    }
+</span><span class='line'>  end
+</span><span class='line'>
+</span><span class='line'>  it "forces the session cookie domain to be the second-level domain of the full domain name" do
+</span><span class='line'>    @env["SERVER_NAME"] = "store.xpeppers.com"
+</span><span class='line'>
+</span><span class='line'>    @env["rack.session.options"][:domain].should be_nil
+</span><span class='line'>
+</span><span class='line'>    set_cookie_domain.call(@env)
+</span><span class='line'>
+</span><span class='line'>    @env["rack.session.options"][:domain].should == ".xpeppers.com"
+</span><span class='line'>  end
+</span><span class='line'>end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To enable the middleware, you&#8217;ve to put this line in your Rails startup files (e.g. environment.rb)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>config.middleware.use "SetCookieDomain"</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -984,57 +1147,6 @@ Here is our helper method
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/">Fixing SeleniumRC to Work With Firefox 3.6</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-02-04T00:00:00+01:00" pubdate data-updated="true">Feb 4<span>th</span>, 2010</time>
-        
-         | <a href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">The brand new release of Firefox 3.6 brings, together with some improvements in the browser, also some headaches for all selenium users: actually the latest selenium RC jar (selenium-server.jar) won&#8217;t work with Firefox 3.6.
-
-The problem is related to the addons that Selenium will pretend to have in the Firefox instance fired up when Selenium RC server starts. As a matter of fact, those two addons are not declared to be compatible with 3.6.
-
-The simple fix is then to edit the addons&#8217; install.rdf files in the selenium-server.jar to manually set the compatibility to 3.6.
-
-Alternatively, you can download <a href="http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar">this patched jar</a> from <a href="http://github.com/saucelabs/saucelenium/">this</a> repository, rename it to selenium-server.jar and replace the previous jar with this.
-
-The actual steps to fix my webrat gem (I use Selenium through Webrat) were
-<ol>
-	<li>download the above mentioned file (http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar)</li>
-	<li>rename it to selenium-server.jar</li>
-	<li>replace the previous file in the vendor folder of your webrat gem (mine was /usr/local/lib/ruby/gems/1.8/gems/webrat-0.7.0/vendor/selenium-server.jar)</li>
-</ol>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1050,6 +1162,10 @@ The actual steps to fix my webrat gem (I use Selenium through Webrat) were
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/">Setting the Rails session cookie domain based on the actual server name</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
       </li>
     
@@ -1063,10 +1179,6 @@ The actual steps to fix my webrat gem (I use Selenium through Webrat) were
     
       <li class="post">
         <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
       </li>
     
   </ul>

@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>assert_select_rjs reloaded! - XPlayer</title>
+  <title>Category: Rails - XPlayer</title>
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="If you ever dared to unit-test a Rails RJS action, for example something like this: def my_ajax_action ... render(:update) do |page| page. &hellip;">
+  <meta name="description" content="Category: Rails">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://xplayer.github.com/blog/2010/09/16/assert_select_rjs-reloaded/">
+  <link rel="canonical" href="http://xplayer.github.comblog/categories/rails/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -75,114 +75,35 @@
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">Assert_select_rjs Reloaded!</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-09-16T00:00:00+02:00" pubdate data-updated="true">Sep 16<span>th</span>, 2010</time>
-        
-         | <a href="#disqus_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Category: Rails</h1>
     
   </header>
+  
+  <div id="blog-archives" class="category">
 
 
-<div class="entry-content"><div id="_mcePaste">If you ever dared to unit-test a Rails RJS action, for example something like this:</div>
-<blockquote>
-<pre>def my_ajax_action
-   ...
-   render(:update) do |page|
-     page.replace_html 'shoppinglist', :partial =&gt; 'cart'
-     page.replace_html 'items', :partial =&gt; 'layouts/items', :locals =&gt; { :cart =&gt; @cart }
-   end
-end</pre>
-</blockquote>
-<div id="_mcePaste">you may already know and use the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> testing helper, which basically will verify the structure of your RJS response.</div>
-This testing method may really help you shortening the TDD feedback loop in an AJAX-based Rails webapp, and then you&#8217;ll may even be confident enough and save one or two brittle Selenium tests.
-<div>The only problem with <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> is that is (IMHO) poorly documented and rarely googled about.</div>
-<div id="_mcePaste">So, this is my turn to give back what we discovered.</div>
-If you have a Rails webapp using jQuery as javascript framework, you may have a hard time using <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a> correctly, and this is why:
-<div id="_mcePaste">for jQuery, this is the correct way to use <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>:</div>
-<blockquote>
-<pre>assert_select_rjs :replace_html, '#shoppinglist'</pre>
-</blockquote>
-<div>it&#8217;s important the &#8216;#&#8217; prefix here to refer to DOM element IDs, since the notation without &#8216;#&#8217; will work only if your app uses Prototype.</div>
-<div id="_mcePaste">Another nice thing to know is the way to make assertion on the selection matched by the <a href="http://rubydoc.info/docs/rails/2.3.8/ActionController/Assertions/SelectorAssertions:assert_select_rjs">assert_select_rjs</a>.</div>
-<div id="_mcePaste">For example, this code</div>
-<blockquote>
-<pre>assert_select_rjs :replace_html, '#shoppinglist' do
-    assert_select '#shipping_cost_description', /Shipping costs for France/
-    assert_select '#shipping_cost_value', /&amp;euro; 12,30/
-end</pre>
-</blockquote>
-<div>will verify that the section replaced inside the &#8216;shoppinglist&#8217; element will match the two followings assetions.</div>
+
+  
+  <h2>2013</h2>
+
+<article>
+  
+<h1><a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/">Setting the Rails session cookie domain based on the actual server name</a></h1>
+<time datetime="2013-06-18T00:08:00+02:00" pubdate><span class='month'>Jun</span> <span class='day'>18</span> <span class='year'>2013</span></time>
+
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/ruby/'>Ruby</a></span>
+</footer>
+
+
+</article>
+
 </div>
 
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">Pietro Di Bello</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-09-16T00:00:00+02:00" pubdate data-updated="true">Sep 16<span>th</span>, 2010</time>
-      
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://xplayer.github.com/blog/2010/09/16/assert_select_rjs-reloaded/" data-via="pierodibello" data-counturl="http://xplayer.github.com/blog/2010/09/16/assert_select_rjs-reloaded/" >Tweet</a>
-  
-  
-  <div class="g-plusone" data-size="medium"></div>
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2010/02/19/my-first-test-using-webdriver-aka-selenium-2-0/" title="Previous Post: My first test using webdriver (aka Selenium 2.0)!">&laquo; My first test using webdriver (aka Selenium 2.0)!</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2011/03/12/dinamically-add-data-accessor-methods-on-static-rails-data-model/" title="Next Post: Dynamically add data accessor methods on "static" Rails data model">Dynamically add data accessor methods on "static" Rails data model &raquo;</a>
-      
-    </p>
-  </footer>
 </article>
 
 </div>

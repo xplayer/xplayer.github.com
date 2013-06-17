@@ -9,7 +9,7 @@
   <meta name="author" content="Pietro Di Bello">
 
   
-  <meta name="description" content="DeepTest currently won&#8217;t work if you&#8217;ve configured MySQL with no password (in other words, if you are able to connect to mysql with a &hellip;">
+  <meta name="description" content="The brand new release of Firefox 3.6 brings, together with some improvements in the browser, also some headaches for all selenium users: actually the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,57 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/">Fixing SeleniumRC to Work With Firefox 3.6</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2010-02-04T00:00:00+01:00" pubdate data-updated="true">Feb 4<span>th</span>, 2010</time>
+        
+         | <a href="/blog/2010/02/04/fixing-seleniumrc-to-work-with-firefox-3-6/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">The brand new release of Firefox 3.6 brings, together with some improvements in the browser, also some headaches for all selenium users: actually the latest selenium RC jar (selenium-server.jar) won&#8217;t work with Firefox 3.6.
+
+The problem is related to the addons that Selenium will pretend to have in the Firefox instance fired up when Selenium RC server starts. As a matter of fact, those two addons are not declared to be compatible with 3.6.
+
+The simple fix is then to edit the addons&#8217; install.rdf files in the selenium-server.jar to manually set the compatibility to 3.6.
+
+Alternatively, you can download <a href="http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar">this patched jar</a> from <a href="http://github.com/saucelabs/saucelenium/">this</a> repository, rename it to selenium-server.jar and replace the previous jar with this.
+
+The actual steps to fix my webrat gem (I use Selenium through Webrat) were
+<ol>
+	<li>download the above mentioned file (http://github.com/saucelabs/saucelenium/blob/master/selenium-sauce.jar)</li>
+	<li>rename it to selenium-server.jar</li>
+	<li>replace the previous file in the vendor folder of your webrat gem (mine was /usr/local/lib/ruby/gems/1.8/gems/webrat-0.7.0/vendor/selenium-server.jar)</li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -826,53 +877,6 @@ Per vedere anche lo stato della connessione
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2008/02/08/michael-feathers-on-testing-private-methods/">Michael Feathers on Testing Private Methods</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2008-02-08T00:00:00+01:00" pubdate data-updated="true">Feb 8<span>th</span>, 2008</time>
-        
-         | <a href="/blog/2008/02/08/michael-feathers-on-testing-private-methods/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content">Da <a href="http://www.infoq.com/news/2008/01/private-methods-tdd-design">un articolo di InfoQ,</a> la posizione di M.Feathers sul testare i metodi privati:
-
-Michael Feathers suggested last year in <a href="http://michaelfeathers.typepad.com/michael_feathers_blog/2007/09/the-deep-synerg.html">The Deep Synergy Between Testability and Good Design</a> that TDD encourages good design and, conversely, code that is not testable should make us think twice:
-<blockquote><i>When I write tests and I have the urge to test a private method, I take it as a hint. The hint tells me that my class is encapsulating so much that it has ceased to be &#8220;understandable&#8221; by tests through its public interface. I listen to the hint, and factor my design differently. Usually, I end up moving the private method (and possibly some methods around it) to a new class where it can be non-private and accessible to tests.</i></blockquote>
-Condivido al 100%!
-
-E interessante anche quello che dice dopo, nel post originale, riguardo alla relazione tra coupling, cohesion e testabilita&#8217;.
-<blockquote><i>In the end, it all comes down to cohesion and coupling.  If classes are deeply coupled with their neighbors, it is hard to control them in a test or observe them independently.  If a class isn&#8217;t cohesive, it may have some logic which is not easily exercisable through its public interface.</i>
-
-<i>It seems that reverse is true also.  Classes which are hard to instantiate and use in a test harness are more coupled than they could be, and classes with private methods that you feel the urge to test, invariably have some sort of cohesion problem: they have more than one responsibility.</i></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -890,6 +894,10 @@ E interessante anche quello che dice dopo, nel post originale, riguardo alla rel
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/18/setting-the-rails-session-cookie-domain-based-on-the-actual-server-name/">Setting the Rails session cookie domain based on the actual server name</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/03/18/introducing-tracco-the-trello-effort-tracker-gem/">Introducing Tracco: the Trello Effort Tracker gem</a>
       </li>
     
@@ -903,10 +911,6 @@ E interessante anche quello che dice dopo, nel post originale, riguardo alla rel
     
       <li class="post">
         <a href="/blog/2012/01/22/a-rails-project-file-for-sublime-text-2/">A Rails project file for Sublime Text 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2011/08/27/a-review-of-great-bash-video-by-carl-albing-oreilly-media/">A review of &#8220;Great Bash&#8221; video by Carl Albing (O&#8217;Reilly Media)</a>
       </li>
     
   </ul>
