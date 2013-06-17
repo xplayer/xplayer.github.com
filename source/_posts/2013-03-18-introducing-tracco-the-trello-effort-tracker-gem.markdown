@@ -3,6 +3,7 @@ layout: post
 title: "Introducing Tracco: the Trello Effort Tracker gem"
 date: 2013-03-18 23:27
 comments: true
+sharing: true
 published: true
 categories: [Ruby, Trello, Gem]
 ---
