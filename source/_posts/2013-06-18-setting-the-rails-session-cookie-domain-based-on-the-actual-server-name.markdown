@@ -3,7 +3,7 @@ layout: post
 title: "Setting the Rails session cookie domain based on the actual server name"
 date: 2013-06-18 00:08
 comments: true
-published: false
+published: true
 sharing: true
 categories: [Ruby, Rails]
 ---
